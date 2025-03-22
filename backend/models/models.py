@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from . import db
 
 class User(db.Model):
@@ -40,7 +42,7 @@ class UserProgress(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     problem_id = db.Column(db.Integer, db.ForeignKey('problem.id'), nullable=False)
-    start_time = db.Column(db.DateTime, default=db.func.now(), nullable=False)
+    start_time = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     user = db.relationship('User', backref=db.backref('progress', lazy=True))
     problem = db.relationship('Problem', backref=db.backref('progress', lazy=True))

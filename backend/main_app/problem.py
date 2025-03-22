@@ -9,8 +9,6 @@ def get_problem(problem_id):
     if not problem:
         return jsonify({"error": "Problem not found"}), 404
 
-    print()
-
     return jsonify({
         "problem_id": problem.out_id,
         "title": problem.title,
