@@ -28,11 +28,17 @@ export default function ProblemText({
     return text
       .trim()
       .replace(/\s+/g, " ") // Remove extra whitespaces
-      .replace(/\\n+/g, "</p><p>") // Handle line breaks
+      .replace(/\\n+/g, "</p><p>") // Handle line breaks; Creates extra <p></p> tags will handle later
       .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // Handle bold
-      .replace(/\[(.*?)\]\((.*?)\)/g, "<a href='$2'>$1</a>")
-      .replace(/\\(\*\*|\[|\]|\\|n)/g, "$1") // Handle links
-      .replace(/\* (.*?)/g, "&#8226;&#9;"); // Handle bullet points
+      .replace(/\[(.*?)\]\((.*?)\)/g, "<a href='$2'>$1</a>") // Handle links
+      .replace(/\\(\*\*|\[|\]|\\|_)/g, "$1") // Handle escapes
+      .replace(/\* (.*?)/g, "&#8226;&#9;") // *... => bullet point
+      .replace(/<p>\s*<\/p>/g, "") // Remove empty <p></p> tags
+      .replace(/`(\d+)\^(\d+)`/g, "$1<sup>$2</sup>") // Handle exponents
+      .replace(
+        /`(.*?)`/g,
+        "<span class='bg-[#000a2008] border-[#0000000d] rounded-[5px] border-[1px] text-[#262626bf] font-[.75rem] p-[.125rem]'>$1</span>"
+      ); // `...` => <span>...<span>
   };
   return (
     <div className="py-5 px-4 flex gap-4 flex-col overflow-y-scroll h-full">
