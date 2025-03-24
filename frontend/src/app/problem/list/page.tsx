@@ -1,9 +1,21 @@
 "use client";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export default function List() {
   const [problemList, setProblemList] = useState<Array<Object>>([
     { testing: "test" },
+    { testing: "hi" },
+    { testing: "hi" },
+    { testing: "hi" },
+    { testing: "hi" },
+    { testing: "hi" },
+    { testing: "hi" },
+    { testing: "hi" },
+    { testing: "hi" },
+    { testing: "hi" },
+    { testing: "hi" },
+    { testing: "hi" },
     { testing: "hi" },
   ]);
 
@@ -13,7 +25,7 @@ export default function List() {
   }, []);
   const Rows = (value: Object, index: number) => {
     return (
-      <tr className="bg-white">
+      <tr className="bg-white h-25">
         <td className="p-3">
           <div className="flex align-items-center">
             <img
@@ -23,7 +35,9 @@ export default function List() {
             />
           </div>
         </td>
-        <td className="p-3">Technology</td>
+        <td className="p-3">
+          <Link href="/problem/1">Technology</Link>
+        </td>
         <td className="p-3 font-bold">200.00$</td>
         <td className="p-3 ">
           <a href="#" className="text-black  mr-2">
@@ -41,11 +55,11 @@ export default function List() {
         href="https://fonts.googleapis.com/css?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Two+Tone|Material+Icons+Round|Material+Icons+Sharp"
         rel="stylesheet"
       />
-      <div className="flex items-center justify-center min-h-screen bg-gray-300">
+      <div className="flex items-center justify-center min-h-screen bg-gray-200">
         <div className="col-span-12">
           <div className="overflow-auto lg:overflow-visible ">
             <table className="w-[50vw] table text-black border-separate border-spacing-y-6 border-spacing-x-0 text-sm border-collapse">
-              <thead className="bg-white text-black">
+              <thead className="bg-white text-black h-25">
                 <tr>
                   <th className="p-3 text-left w-1/20 pr-5 pl-10">Status</th>
                   <th className="p-3 text-left px-5">Title</th>
