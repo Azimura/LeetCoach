@@ -1,5 +1,4 @@
 import textwrap
-import traceback
 
 from flask import Blueprint, jsonify, request
 
