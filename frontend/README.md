@@ -1,7 +1,7 @@
 # 🧠 LeetCoach – Offline Coding Platform
 
-A small NextJS web application that utilizes AI to assist users in learning LeetCode style problems
-All coding questions asked are derived from LeetCode
+A small NextJS web application that utilizes AI to assist users in learning LeetCode style problems.
+All coding questions asked are derived from LeetCode.
 
 ---
 
