@@ -20,7 +20,7 @@ export default function Problem({
   params: Promise<{ id: number }>;
 }) {
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
-  const [displayChatbox, setDisplayChatbox] = useState(true);
+  const [displayChatbox, setDisplayChatbox] = useState(false);
   const [problem, setProblem] = useState<ProblemResponse>({
     content: "",
     code_template: "",
@@ -116,7 +116,7 @@ export default function Problem({
           />
         </div>
         <div className="bg-white p-0 m-0" key={"Code Editor"}>
-          <CodeEditor />
+          <CodeEditor initialCode={problem.code_template} />
         </div>
         <div className="bg-white p-0 m-0" key={"Result"}>
           <h1> Result </h1>
