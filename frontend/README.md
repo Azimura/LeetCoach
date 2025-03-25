@@ -1,7 +1,7 @@
 # 🧠 LeetCoach – Offline Coding Platform
 
 
-A mini backend system for practicing coding problems like LeetCode.  
+A mini backend system for practicing coding problems like LeetCode.
 Supports test cases, user code submissions, result evaluation, and progress tracking.
 A small NextJS web application to assist users in learning LeetCode style problems.
 All coding questions asked are derived from LeetCode.
