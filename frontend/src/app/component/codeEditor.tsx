@@ -13,13 +13,13 @@ const CodeEditor = ({ initialCode, TestCode, SubmitCode }: CodeEditorProps) => {
   return (
     <div className="h-1/1 flex flex-col justify-between">
       <div className="flex justify-between px-3 py-3 border-b">
-        <h1 className="font-bold text-2xl"> Code Editor </h1>
+        <h1 className="font-bold text-2xl text-black"> Code Editor </h1>
         <div>
           <button
             onClick={() => {
               TestCode(code);
             }}
-            className="cursor-pointer self-end py-1.5 font-medium items-center whitespace-nowrap focus:outline-none inline-flex bg-fill-3 bg-[#000a200d] hover:bg-[#000a201a] h-[32px] select-none px-5 text-[12px] leading-[1.25rem] text-sm rounded-lg ml-2"
+            className="text-black cursor-pointer self-end py-1.5 font-medium items-center whitespace-nowrap focus:outline-none inline-flex bg-fill-3 bg-[#000a200d] hover:bg-[#000a201a] h-[32px] select-none px-5 text-[12px] leading-[1.25rem] text-sm rounded-lg ml-2"
           >
             Run
           </button>

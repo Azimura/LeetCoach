@@ -118,7 +118,7 @@ export default function Problem({
         }}
         result={result}
       />
-      <div className="tooltip-container absolute bottom-[30px] right-[100px] z-10">
+      <div className="tooltip-container absolute bottom-[2rem] right-[3rem] z-10">
         <button
           aria-describedby="help-tooltip"
           className="help-button bg-[#4346f0] text-white border-none p-[12px 24px] text-white border-none rounded-[8px] py-[12px] px-[24px] cursor-pointer text-[16px] font-semibold shadow-[0 6px 12px rgba(0, 0, 0, 0.15)] hover:transform-[translateY(-2px)] hover:shadow-[0 6px 12px rgba(0, 0, 0, 0.15)]"

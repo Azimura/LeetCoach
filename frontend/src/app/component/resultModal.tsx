@@ -44,9 +44,9 @@ export default function ResultModal({
       <>
         <FontAwesomeIcon
           icon={faCircleNotch}
-          className="text-[128px] text-center animate-spin"
+          className="text-[128px] text-center text-black animate-spin"
         />
-        <p className="text-[32px] text-center">Testing...</p>
+        <p className="text-[32px] text-center text-black">Testing...</p>
       </>
     );
   };
@@ -74,11 +74,11 @@ export default function ResultModal({
             {result.pass} / {result.test_cases} Passed
           </p>
           <div className="flex flex-col gap-2">
-            <label className="font-semibold">Input: </label>
+            <label className="font-semibold text-black">Input: </label>
             <span className="bg-[#000a2008] border-[#0000000d] rounded-[5px] border-[1px] text-[#262626bf] font-[.75rem]  p-3">
               {result.error_message.input}
             </span>
-            <label className="font-semibold">Error: </label>
+            <label className="font-semibold text-black">Error: </label>
             <span className="bg-[#000a2008] border-[#0000000d] rounded-[5px] border-[1px] text-[#262626bf] font-[.75rem]  p-3">
               {result.error_message.error}
             </span>

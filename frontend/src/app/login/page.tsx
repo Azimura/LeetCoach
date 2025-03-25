@@ -2,10 +2,17 @@ import Image from "next/image";
 import Icon from "@/app/favicon.ico";
 import { redirect } from "next/navigation";
 
-const formAction = async () => {
+const formAction = async (formData: FormData) => {
   "use server";
+
   //TODO: Call API to login
-  redirect("/problem/list");
+  console.log(
+    await fetch("http://localhost:3000/api/login", {
+      method: "POST",
+      body: formData,
+    })
+  );
+  //redirect("/problem/list");
 };
 export default function Login() {
   return (

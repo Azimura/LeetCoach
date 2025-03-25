@@ -115,9 +115,11 @@ export default function Chatbox({ className, active }: ChatboxProps) {
   return (
     <div className={className}>
       <div className="flex flex-col space-y-1.5 pb-6">
-        <h2 className="font-semibold text-lg tracking-tight">LeetCoach</h2>
+        <h2 className="font-semibold text-lg tracking-tight text-black">
+          LeetCoach
+        </h2>
         <p className="text-sm text-[#6b7280] leading-3">
-          Powered by Mendable and Vercel
+          Powered by ThinkLink Gemma-2-2B-IT
         </p>
       </div>
       <div className="chatBody pr-4 h-[474px] min-w-1/1 flex flex-col">
@@ -133,9 +135,9 @@ export default function Chatbox({ className, active }: ChatboxProps) {
           <input
             className="mr-2 flex h-10 w-full rounded-md border border-[#e5e7eb] px-3 py-2 text-sm placeholder-[#6b7280] focus:outline-none focus:ring-2 focus:ring-[#9ca3af] disabled:cursor-not-allowed disabled:opacity-50 text-[#030712] focus-visible:ring-offset-2"
             placeholder="Type your message"
-            value=""
+            defaultValue=""
           />
-          <button className="inline-flex items-center justify-center rounded-md text-sm font-medium text-[#f9fafb] disabled:pointer-events-none disabled:opacity-50 bg-black hover:bg-[#111827E6] h-10 px-4 py-2">
+          <button className="cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium text-[#f9fafb] disabled:pointer-events-none disabled:opacity-50 bg-black hover:bg-[#111827E6] h-10 px-4 py-2">
             Send
           </button>
         </div>
