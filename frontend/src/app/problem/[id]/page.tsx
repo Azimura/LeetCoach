@@ -6,6 +6,7 @@ import "./problem.module.css";
 import Chatbox from "@/app/component/chatBox";
 import ProblemText from "@/app/component/problemText";
 import ResultModal from "@/app/component/resultModal";
+import { getCookie, getCookies } from "cookies-next/client";
 
 interface ProblemResponse {
   code_template: string;
@@ -16,11 +17,9 @@ interface ProblemResponse {
   title: string;
 }
 
-const GetProblem = async (
-  setProblem: Dispatch<SetStateAction<ProblemResponse>>
-) => {
+const GetProblem = async (problemID: number) => {
   //TODO: retrieve problem details via API
-  setProblem({
+  return {
     code_template: "def removeDuplicates(nums):",
 
     content:
@@ -33,25 +32,43 @@ const GetProblem = async (
     tags: ["Two Pointers"],
 
     title: "Remove Duplicates from Sorted Array",
-  });
+  };
 };
 
-const TestCodeServer = (
-  code: string,
-  setResult: Dispatch<SetStateAction<{}>>
-) => {
+const TestCodeServer = async (code: string) => {
   //TODO: Call API to test code
+  return {
+    error_message: {
+      result: 1,
+    },
+    pass: 2,
+    submission_id: 5,
+    test_cases: 2,
+  };
 };
 
-const SubmitCodeServer = (
-  code: string,
-  setResult: Dispatch<SetStateAction<Object>>
-) => {
+const SubmitCodeServer = async (code: string) => {
   // TODO: Call API to submit code
+  return {
+    error_message: {
+      error: "Runtime error: list index out of range",
+      error_line: 4,
+      input: "nums = [0, 0, 1, 1, 1, 2, 2, 3, 3, 4]",
+      result: 0, // 0 is failed, 1 is successful
+    },
+    pass: 0,
+    submission_id: 17,
+    test_cases: 2,
+  };
 };
 
-const StartProgress = () => {
+const StartProgress = async (problemID: number, userID: number) => {
   // TODO: Call API to start progress
+  return {
+    message: "Progress created",
+    progress_id: 42,
+    start_time: 1710512374, // UNIX timestamp
+  };
 };
 
 export default function Problem({
@@ -59,19 +76,11 @@ export default function Problem({
 }: {
   params: Promise<{ id: number }>;
 }) {
+  "use client";
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
   const [displayChatbox, setDisplayChatbox] = useState(false);
-  const [displayResult, setDisplayResult] = useState(true);
-  const [result, setResult] = useState<any>({
-    error_message: {
-      error: "Expected 2, but got 1",
-      input: "nums = [1, 1, 2]",
-      result: 0,
-    },
-    pass: 0,
-    submission_id: 38,
-    test_cases: 2,
-  });
+  const [displayResult, setDisplayResult] = useState(false);
+  const [result, setResult] = useState<any>({});
   const [problem, setProblem] = useState<ProblemResponse>({
     content: "",
     code_template: "",
@@ -80,15 +89,27 @@ export default function Problem({
     tags: [],
     title: "",
   });
-  const TestCode = (code: string) => {
-    TestCodeServer(code, setResult);
+  const TestCode = async (code: string) => {
+    setResult({});
+    setDisplayResult(true);
+    const result = await TestCodeServer(code);
+    setResult(result);
   };
 
-  const SubmitCode = (code: string) => {
-    SubmitCodeServer(code, setResult);
+  const SubmitCode = async (code: string) => {
+    setResult({});
+    setDisplayResult(true);
+    const result = await SubmitCodeServer(code);
+    setResult(result);
+  };
+
+  const RetrieveProblem = async () => {
+    const { id } = await params;
+    const problem = await GetProblem(id);
+    setProblem(problem);
   };
   useEffect(() => {
-    GetProblem(setProblem);
+    RetrieveProblem();
 
     setWindowSize({ width: window.innerWidth, height: window.innerHeight });
 
@@ -99,6 +120,12 @@ export default function Problem({
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  const BeginProgress = async () => {
+    const userID = Number(getCookie("name"));
+    const { id } = await params;
+    const response = await StartProgress(id, userID);
+  };
 
   useEffect(() => {
     if (!displayResult) {
@@ -153,7 +180,9 @@ export default function Problem({
         </div>
         <div className="bg-white p-0 m-0" key={"Code Editor"}>
           <CodeEditor
-            initialCode={problem.code_template}
+            initialCode={
+              "def removeDuplicates(nums):\n    i = 0\n    for j in range(1, len(nums)):\n        if nums[j] != nums[i]:\n            i += 1\n            nums[i] = nums[j]\n    return i + 1"
+            }
             TestCode={TestCode}
             SubmitCode={SubmitCode}
           />

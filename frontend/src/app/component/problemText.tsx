@@ -15,16 +15,6 @@ export default function ProblemText({
 }: ProblemTextProps) {
   const ParseContent = (text: string) => {
     text = "<p>" + text + "</p>";
-    console.log(
-      text
-        .trim()
-        .replace(/\s+/g, " ") // Remove extra whitespaces
-        .replace(/\\n+/g, "</p><p>") // Handle line breaks
-        .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // Handle bold
-        .replace(/\[(.*?)\]\((.*?)\)/g, "<a href='$2'>$1</a>")
-        .replace(/\\(\*\*|\[|\]|\\|n)/g, "$1") // Handle links
-        .replace(/\* (.*?)/g, "&#8226;&#9;")
-    );
     return text
       .trim()
       .replace(/\s+/g, " ") // Remove extra whitespaces

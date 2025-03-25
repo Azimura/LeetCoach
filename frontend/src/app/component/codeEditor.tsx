@@ -1,6 +1,7 @@
 "use client";
-import { Editor } from "@monaco-editor/react";
-import { useState } from "react";
+import { Editor, Monaco } from "@monaco-editor/react";
+import { editor } from "monaco-editor";
+import { useRef, useState } from "react";
 
 interface CodeEditorProps {
   initialCode: string;
@@ -10,6 +11,28 @@ interface CodeEditorProps {
 
 const CodeEditor = ({ initialCode, TestCode, SubmitCode }: CodeEditorProps) => {
   const [code, setCode] = useState<string>(initialCode);
+  const editorRef = useRef<editor.IStandaloneCodeEditor>(null);
+
+  const onEditorMount = (
+    editor: editor.IStandaloneCodeEditor,
+    monaco: Monaco
+  ) => {
+    editorRef.current = editor;
+    /*editorRef.current?.createDecorationsCollection([
+      {
+        range: {
+          startLineNumber: 4,
+          endLineNumber: 4,
+          startColumn: 0,
+          endColumn: 0,
+        },
+        options: {
+          isWholeLine: true,
+          inlineClassName: "underline decoration-red-500 decoration-wavy",
+        },
+      },
+    ]);*/
+  };
   return (
     <div className="h-1/1 flex flex-col justify-between">
       <div className="flex justify-between px-3 py-3 border-b">
@@ -51,6 +74,7 @@ const CodeEditor = ({ initialCode, TestCode, SubmitCode }: CodeEditorProps) => {
           }
         }}
         className="pt-5"
+        onMount={onEditorMount}
       />
     </div>
   );
