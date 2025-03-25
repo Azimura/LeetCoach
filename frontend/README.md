@@ -19,7 +19,7 @@ npm install
 
 ## Running Server
 
-First, run the development server:
+To run the server:
 
 ```bash
 npm run dev
