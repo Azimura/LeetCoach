@@ -18,8 +18,9 @@ LeetCoach is made for:
 - Developers looking to sharpen their algorithm skills
 - Any user seeking a reflective, supportive approach to coding practice
 
-## Technologies Used
+## Libraries and Frameworks Used
 
-- React (Frontend)
+- React, TailwindCSS (Frontend)
 - Node.js / Express (Backend)
 - MongoDB (Database)
+- ThinkLink Gemma-2-2B-IT (LLM)
