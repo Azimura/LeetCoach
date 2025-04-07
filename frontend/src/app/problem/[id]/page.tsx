@@ -18,7 +18,6 @@ interface ProblemResponse {
 }
 
 const GetProblem = async (problemID: number) => {
-  //TODO: retrieve problem details via API
   return {
     code_template: "def removeDuplicates(nums):",
 
