@@ -5,21 +5,20 @@ import { cookies } from "next/headers";
 
 const formAction = async (formData: FormData) => {
   "use server";
+  const response = await fetch("http://127.0.0.1:5000/user", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      username: formData.get("username"),
+    }),
+  });
+  const { user_id, username } = await response.json();
 
-  //TODO: Call API to login
-  /*console.log(
-    await fetch("http://127.0.0.1:5000/user", {
-      method: "POST",
-      body: formData,
-    })
-  );*/
-
-  let response = {
-    user_id: 1,
-    username: "johndoe",
-  };
   const cookieStore = await cookies();
-  cookieStore.set("userID", response.user_id.toString());
+  cookieStore.set("userID", user_id);
+  cookieStore.set("username", username);
   redirect("/problem/26");
 };
 export default function Login() {
