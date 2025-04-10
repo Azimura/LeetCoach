@@ -21,6 +21,6 @@ LeetCoach is made for:
 ## Libraries and Frameworks Used
 
 - React, TailwindCSS (Frontend)
-- Node.js / Express (Backend)
-- MongoDB (Database)
+- FastAPI (Backend)
+- SQLLite (Database)
 - ThinkLink Gemma-2-2B-IT (LLM)
