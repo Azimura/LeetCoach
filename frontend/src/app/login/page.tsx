@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 
 const formAction = async (formData: FormData) => {
-  //TODO: Call API to login
+  "use server";
   const response = await fetch("http://127.0.0.1:5000/user", {
     method: "POST",
     headers: {
