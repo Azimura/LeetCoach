@@ -14,16 +14,16 @@ python -m venv <directory name>
 ```
 For example:
 ```bash
-python -m venv venv
+python -m venv .venv
 ```
 Then activate it:
 - **Windows**
 ```bash
-venv\Scripts\activate
+.venv\Scripts\activate
 ```
 - **macOS/Linux**
 ```bash
-source venv/bin/activate
+source .venv/bin/activate
 ```
 
 ### 2. 🔧 Install dependencies
