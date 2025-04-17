@@ -59,7 +59,7 @@ def submit_solution():
             assert_code=tc.expected_output,
             timeout=3
         )
-        if result['result']:
+        if result['result'] == 1:
             passed_tests += 1
         else:
             last_result = result
@@ -92,11 +92,12 @@ def test_solution():
     user_code = data.get("code")  # submitted Python function
 
     if not all([user_id, problem_id, user_code]):
-        return jsonify({
+        err_msg = {
             "error_message": {
                 "error": "Missing user id, problem id, or user code",
                 "result": 0,
-            }}), 400
+            }}
+        return jsonify(err_msg), 400
 
     problem = Problem.query.filter_by(out_id=problem_id).first()
     if not problem:
