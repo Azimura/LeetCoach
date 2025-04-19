@@ -1,4 +1,4 @@
-FROM gemma3:27b
+FROM gemma3:4b
 
 PARAMETER temperature 0.1
 

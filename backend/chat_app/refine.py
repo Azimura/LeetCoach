@@ -1,6 +1,5 @@
 import requests
 from flask import Blueprint, request, jsonify
-import ast
 from models.models import db, Refine
 
 refine_bp = Blueprint('refine', __name__)
