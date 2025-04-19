@@ -21,16 +21,17 @@ class ProblemTagAdmin(ModelView):
     form_excluded_columns = ('id',)
 
 class SubmissionAdmin(ModelView):
-    column_list = ('id', 'user_id', 'problem_id', 'code', 'result', 'submission_time')
-    form_columns = ('user_id', 'problem_id', 'code', 'result', 'submission_time')
+    column_list = ('id', 'user_id', 'problem_id', 'code', 'result', 'submission_type', 'test_passed', 'test_total', 'submission_time')
     form_excluded_columns = ('id',)
 
 class UserProgressAdmin(ModelView):
     column_list = ('id', 'user_id', 'problem_id', 'start_time')
-    form_columns = ('user_id', 'problem_id', 'start_time')  # Use relationships
     form_excluded_columns = ('id',)
 
 class TestCaseAdmin(ModelView):
     column_list = ('id', 'problem_id', 'input_data', 'expected_output', 'is_sample')
     form_columns = ('problem_id', 'input_data', 'expected_output', 'is_sample')
     form_excluded_columns = ('id',)
+
+class RefineAdmin(ModelView):
+    column_list = ('id', 'user_id', 'problem_id', 'input_code', 'answer', 'type', 'refine_time')

@@ -1,9 +1,10 @@
 from flask import Flask
 from flask_admin import Admin
 from models import init_db
-from models.models import db, User, Problem, Tag, ProblemTag, Submission, UserProgress, TestCase
+from models.models import db, User, Problem, Tag, ProblemTag, Submission, UserProgress, TestCase, Refine
 from config import Config
-from .views import ProblemAdmin, UserAdmin, TagAdmin, ProblemTagAdmin, SubmissionAdmin, UserProgressAdmin, TestCaseAdmin
+from .views import ProblemAdmin, UserAdmin, TagAdmin, ProblemTagAdmin, SubmissionAdmin, UserProgressAdmin, TestCaseAdmin, RefineAdmin
+from sqlalchemy.orm import scoped_session, sessionmaker
 
 admin_app = Flask(__name__)
 admin_app.config.from_object(Config)
@@ -18,3 +19,8 @@ admin.add_view(ProblemTagAdmin(ProblemTag, db.session))
 admin.add_view(SubmissionAdmin(Submission, db.session))
 admin.add_view(UserProgressAdmin(UserProgress, db.session))
 admin.add_view(TestCaseAdmin(TestCase, db.session))
+
+with admin_app.app_context():
+    refine_engine = db.get_engine(admin_app, bind='ai_db')
+    AISession = scoped_session(sessionmaker(bind=refine_engine))
+    admin.add_view(RefineAdmin(Refine, AISession))

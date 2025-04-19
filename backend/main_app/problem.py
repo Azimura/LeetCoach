@@ -70,7 +70,10 @@ def submit_solution():
         user_id=user_id,
         problem_id=problem.id,
         code=user_code,
-        result=result_flag
+        result=result_flag,
+        submission_type="submit",
+        test_passed=passed_tests,
+        test_total=total_tests,
     )
     db.session.add(submission)
     db.session.commit()
@@ -132,7 +135,10 @@ def test_solution():
         user_id=user_id,
         problem_id=problem.id,
         code=user_code,
-        result=result_flag
+        result=result_flag,
+        submission_type="test",
+        test_passed=passed_tests,
+        test_total=total_tests,
     )
     db.session.add(submission)
     db.session.commit()

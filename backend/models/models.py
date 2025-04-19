@@ -33,6 +33,9 @@ class Submission(db.Model):
     problem_id = db.Column(db.Integer, db.ForeignKey('problem.id'), nullable=False)
     code = db.Column(db.Text, nullable=False)
     result = db.Column(db.Integer, nullable=False)
+    submission_type = db.Column(db.String(10), nullable=False)  # test/submit
+    test_passed = db.Column(db.Integer, nullable=False)
+    test_total = db.Column(db.Integer, nullable=False)
     submission_time = db.Column(db.DateTime, default=db.func.now(), nullable=False)
 
     user = db.relationship('User', backref=db.backref('submissions', lazy=True))
@@ -42,7 +45,7 @@ class UserProgress(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     problem_id = db.Column(db.Integer, db.ForeignKey('problem.id'), nullable=False)
-    start_time = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    start_time = db.Column(db.DateTime, default=db.func.now(), nullable=False)
 
     user = db.relationship('User', backref=db.backref('progress', lazy=True))
     problem = db.relationship('Problem', backref=db.backref('progress', lazy=True))
@@ -55,3 +58,19 @@ class TestCase(db.Model):
     is_sample = db.Column(db.Boolean, default=False)
 
     problem = db.relationship('Problem', backref=db.backref('test_cases', lazy=True))
+
+class Refine(db.Model):
+    __bind_key__ = 'ai_db'
+    __tablename__ = 'refine'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, nullable=False)
+    problem_id = db.Column(db.Integer, nullable=False)
+
+    input_code = db.Column(db.Text, nullable=False)
+    answer = db.Column(db.Text, nullable=False)
+    type = db.Column(db.String(50), nullable=False)
+
+    refine_time = db.Column(db.DateTime, default=db.func.now(), nullable=False)
+    __table_args__ = (
+        db.Index('ix_user_problem', 'user_id', 'problem_id'),
+    )
