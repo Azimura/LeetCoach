@@ -68,7 +68,7 @@ class Refine(db.Model):
 
     input_code = db.Column(db.Text, nullable=False)
     answer = db.Column(db.Text, nullable=False)
-    type = db.Column(db.String(50), nullable=False)
+    result = db.Column(db.Integer, nullable=False)
 
     refine_time = db.Column(db.DateTime, default=db.func.now(), nullable=False)
     __table_args__ = (
