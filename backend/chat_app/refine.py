@@ -20,9 +20,9 @@ def refine():
 
     try:
         answer = refine_code(input_code)
-    except:
+    except Exception as e:
         return jsonify({
-            "message": "Error calling LLM model. Please try again",
+            "message": "Error calling LLM model. Please try again.",
             "result": 2
         })
 
@@ -47,13 +47,35 @@ def refine():
     })
 
 
-def refine_code(prompt, model="refined") -> str:
+def refine_code(input_code, refine_model="refine", compliance_model="compliance") -> str:
     try:
-        response = requests.post(
+        refine_response = requests.post(
             "http://localhost:11434/api/generate",
-            json={"model": model, "prompt": prompt, "stream": False}
+            json={
+                "model": refine_model,
+                "prompt": input_code,
+                "stream": False
+            }
         )
-        data = response.json()
-        return data.get("response", "").strip()
+        refined_output = refine_response.json().get("response", "").strip()
+
+        # Step 2: build compliance prompt using input and output
+        compliance_prompt = {
+            "input_code": input_code,
+            "output_code": refined_output
+        }
+
+        # Step 3: call the compliance-checker model
+        compliance_response = requests.post(
+            "http://localhost:11434/api/generate",
+            json={
+                "model": compliance_model,
+                "prompt": str(compliance_prompt),
+                "stream": False
+            }
+        )
+        final_output = compliance_response.json().get("response", "").strip()
+
+        return final_output
     except Exception as e:
         return f"Error calling llm model: {str(e)}"
