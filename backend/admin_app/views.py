@@ -46,3 +46,7 @@ class TestCaseAdmin(ModelView):
 
 class RefineAdmin(ModelView):
     column_list = ('id', 'user_id', 'problem_id', 'input_code', 'answer', 'result', 'refine_time')
+
+
+class MessageAdmin(ModelView):
+    column_list = ('id', 'user_id', 'problem_id', 'role', 'content', 'ctime')
