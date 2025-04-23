@@ -1,7 +1,7 @@
 "use client";
 import { Editor, Monaco } from "@monaco-editor/react";
 import { editor } from "monaco-editor";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface CodeEditorProps {
   initialCode: string;
@@ -16,7 +16,7 @@ const CodeEditor = ({
   SubmitCode,
   RefineCode,
 }: CodeEditorProps) => {
-  const [code, setCode] = useState<string>(initialCode);
+  let code = initialCode;
   const editorRef = useRef<editor.IStandaloneCodeEditor>(null);
 
   const onEditorMount = (
@@ -46,6 +46,7 @@ const CodeEditor = ({
         <div>
           <button
             onClick={() => {
+              console.log(code);
               TestCode(code);
             }}
             className="text-black cursor-pointer self-end py-1.5 font-medium items-center whitespace-nowrap focus:outline-none inline-flex bg-fill-3 bg-[#000a200d] hover:bg-[#000a201a] h-[32px] select-none px-5 text-[12px] leading-[1.25rem] text-sm rounded-lg ml-2"
@@ -83,8 +84,9 @@ const CodeEditor = ({
           lineNumbers: "on",
         }}
         onChange={(value) => {
+          console.log(value);
           if (value) {
-            setCode(value);
+            code = value;
           }
         }}
         className="pt-5"

@@ -7,15 +7,8 @@ import Chatbox from "@/app/component/chatBox";
 import ProblemText from "@/app/component/problemText";
 import ResultModal from "@/app/component/resultModal";
 import { getCookie } from "cookies-next/client";
-import {
-  GetProblem,
-  Refine,
-  StartProgress,
-  SubmitCodeServer,
-  TestCodeServer,
-} from "./api";
+import { GetProblem, Refine, StartProgress, Submit, Test } from "./api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faClock } from "@fortawesome/free-solid-svg-icons";
 import { faClockFour } from "@fortawesome/free-regular-svg-icons";
 
 interface ProblemResponse {
@@ -45,12 +38,14 @@ export default function Problem({
     tags: [],
     title: "",
   });
+  const [time, setTime] = useState<number>(600);
+  const [timeUp, setTimeUp] = useState<boolean>(false);
   const TestCode = async (code: string) => {
     setResult({});
     setDisplayResult(true);
     const userID = Number(getCookie("userID"));
     const { id } = await params;
-    const result = await TestCodeServer(id, userID, code);
+    const result = await Test(id, userID, code);
     setResult(result);
   };
 
@@ -59,7 +54,7 @@ export default function Problem({
     setDisplayResult(true);
     const userID = Number(getCookie("userID"));
     const { id } = await params;
-    const result = await SubmitCodeServer(id, userID, code);
+    const result = await Submit(id, userID, code);
     setResult(result);
   };
 
@@ -86,14 +81,36 @@ export default function Problem({
       setWindowSize({ width: window.innerWidth, height: window.innerHeight });
     };
 
+    const interval = setInterval(() => {
+      setTime((prevTime) => {
+        if (prevTime <= 0) {
+          clearInterval(interval);
+          setTimeUp(true);
+          return 0;
+        }
+        return prevTime - 1;
+      });
+    }, 1000);
+
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("resize", handleResize);
+    };
   }, []);
 
   const BeginProgress = async () => {
     const userID = Number(getCookie("userID"));
     const { id } = await params;
     const response = await StartProgress(id, userID);
+    console.log(response);
+  };
+
+  const FormatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    const formattedSeconds = String(remainingSeconds).padStart(2, "0");
+    return `${minutes}:${formattedSeconds}`;
   };
 
   useEffect(() => {
@@ -129,10 +146,10 @@ export default function Problem({
         active={displayChatbox}
         className="absolute z-10 bottom-[10px] right-[100px]"
       />
-      <div className="h-10 flex items-center p-2">
+      <div className="h-10 flex items-center justify-center p-2">
         <div className="flex items-center gap-2">
-          <FontAwesomeIcon icon={faClockFour} className="text-gray-60" />
-          <p>14:00</p>
+          <FontAwesomeIcon icon={faClockFour} className="text-gray-600" />
+          <p className="text-gray-600">{FormatTime(time)}</p>
         </div>
       </div>
       <ReactGridLayout
