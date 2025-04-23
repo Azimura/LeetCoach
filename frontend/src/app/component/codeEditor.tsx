@@ -7,9 +7,15 @@ interface CodeEditorProps {
   initialCode: string;
   TestCode: Function;
   SubmitCode: Function;
+  RefineCode: Function;
 }
 
-const CodeEditor = ({ initialCode, TestCode, SubmitCode }: CodeEditorProps) => {
+const CodeEditor = ({
+  initialCode,
+  TestCode,
+  SubmitCode,
+  RefineCode,
+}: CodeEditorProps) => {
   const [code, setCode] = useState<string>(initialCode);
   const editorRef = useRef<editor.IStandaloneCodeEditor>(null);
 
@@ -45,6 +51,14 @@ const CodeEditor = ({ initialCode, TestCode, SubmitCode }: CodeEditorProps) => {
             className="text-black cursor-pointer self-end py-1.5 font-medium items-center whitespace-nowrap focus:outline-none inline-flex bg-fill-3 bg-[#000a200d] hover:bg-[#000a201a] h-[32px] select-none px-5 text-[12px] leading-[1.25rem] text-sm rounded-lg ml-2"
           >
             Run
+          </button>
+          <button
+            onClick={() => {
+              RefineCode(code);
+            }}
+            className="text-black cursor-pointer self-end py-1.5 font-medium items-center whitespace-nowrap focus:outline-none inline-flex bg-fill-3 bg-[#000a200d] hover:bg-[#000a201a] h-[32px] select-none px-5 text-[12px] leading-[1.25rem] text-sm rounded-lg ml-2"
+          >
+            Refine
           </button>
           <button
             onClick={() => {

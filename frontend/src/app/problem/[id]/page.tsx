@@ -9,10 +9,14 @@ import ResultModal from "@/app/component/resultModal";
 import { getCookie } from "cookies-next/client";
 import {
   GetProblem,
+  Refine,
   StartProgress,
   SubmitCodeServer,
   TestCodeServer,
 } from "./api";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faClock } from "@fortawesome/free-solid-svg-icons";
+import { faClockFour } from "@fortawesome/free-regular-svg-icons";
 
 interface ProblemResponse {
   code_template: string;
@@ -59,11 +63,19 @@ export default function Problem({
     setResult(result);
   };
 
+  const RefineCode = async (code: string) => {
+    const userID = Number(getCookie("userID"));
+    const { id } = await params;
+    const result = await Refine(userID, id, code);
+    console.log(result);
+  };
+
   const RetrieveProblem = async () => {
     const { id } = await params;
     const problem = await GetProblem(id);
     setProblem(problem);
   };
+
   useEffect(() => {
     RetrieveProblem();
     BeginProgress();
@@ -117,6 +129,12 @@ export default function Problem({
         active={displayChatbox}
         className="absolute z-10 bottom-[10px] right-[100px]"
       />
+      <div className="h-10 flex items-center p-2">
+        <div className="flex items-center gap-2">
+          <FontAwesomeIcon icon={faClockFour} className="text-gray-60" />
+          <p>14:00</p>
+        </div>
+      </div>
       <ReactGridLayout
         className="layout overflow-hidden"
         layout={layout}
@@ -142,6 +160,7 @@ export default function Problem({
             }
             TestCode={TestCode}
             SubmitCode={SubmitCode}
+            RefineCode={RefineCode}
           />
         </div>
       </ReactGridLayout>
