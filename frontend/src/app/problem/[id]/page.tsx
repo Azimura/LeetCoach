@@ -10,6 +10,7 @@ import { getCookie } from "cookies-next/client";
 import {Chat, GetProblem, Refine, StartProgress, Submit, Test} from "./api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClockFour } from "@fortawesome/free-regular-svg-icons";
+import {Editor} from "@monaco-editor/react";
 
 interface ProblemResponse {
   code_template: string;
@@ -34,7 +35,6 @@ export default function Problem({
   const [error, setError] = useState("");
   const [result, setResult] = useState({});
   const [refinedCode, setRefinedCode] = useState("");
-  const [messages, setMessages] = useState([]);
   const [streamId, setStreamId] = useState(null);
   const [problem, setProblem] = useState<ProblemResponse>({
     content: "",
@@ -46,6 +46,7 @@ export default function Problem({
   });
   const [time, setTime] = useState<number>(600);
   const [timeUp, setTimeUp] = useState<boolean>(false);
+  const [code, setCode] = useState("");
   const TestCode = async (code: string) => {
     setResult({});
     setDisplayResult(true);
@@ -67,6 +68,7 @@ export default function Problem({
   const RefineCode = async (code: string) => {
     const userID = Number(getCookie("userID"));
     const { id } = await params;
+    console.log(userID, id, code);
     const result = await Refine(userID, id, code);
     console.log(result);
     if (result.result) {
@@ -84,6 +86,7 @@ export default function Problem({
     const problem = await GetProblem(id);
     console.log(problem);
     setProblem(problem);
+    setCode(problem.code_template);
   };
 
   const SendMessage = async (message: string) => {
@@ -193,17 +196,48 @@ export default function Problem({
             problemID={problem.problem_id}
           />
         </div>
-        <div className="bg-white p-0 m-0" key={"Code Editor"}>
-          <CodeEditor
-            initialCode={
-             problem.code_template
-            }
-            TestCode={TestCode}
-            SubmitCode={SubmitCode}
-            RefineCode={RefineCode}
-            displayRefinedCode={displayRefinedCode}
-            refinedCode={refinedCode}
-          />
+        <div className="bg-white p-0 m-0 flex flex-row" key={"Code Editor"}>
+          <div className="h-full w-full flex flex-col justify-between">
+            <div className="flex justify-between px-3 py-3 border-b">
+              <h1 className="font-bold text-2xl text-black"> Code Editor </h1>
+              <div>
+                <button
+                    onClick={() => {
+                      TestCode(code);
+                    }}
+                    className="text-black cursor-pointer self-end py-1.5 font-medium items-center whitespace-nowrap focus:outline-none inline-flex bg-fill-3 bg-[#000a200d] hover:bg-[#000a201a] h-[32px] select-none px-5 text-[12px] leading-[1.25rem] text-sm rounded-lg ml-2"
+                >
+                  Run
+                </button>
+                <button
+                    onClick={() => {
+                      RefineCode(code);
+                    }}
+                    className="text-black cursor-pointer self-end py-1.5 font-medium items-center whitespace-nowrap focus:outline-none inline-flex bg-fill-3 bg-[#000a200d] hover:bg-[#000a201a] h-[32px] select-none px-5 text-[12px] leading-[1.25rem] text-sm rounded-lg ml-2"
+                >
+                  Refine
+                </button>
+                <button
+                    onClick={() => {
+                      SubmitCode(code);
+                    }}
+                    className="cursor-pointer self-end py-1.5 font-medium items-center whitespace-nowrap focus:outline-none inline-flex bg-fill-3 bg-[#2db55d] hover:bg-[#269a4f] h-[32px] select-none px-5 text-[12px] leading-[1.25rem] text-white text-sm rounded-lg ml-2"
+                >
+                  Submit
+                </button>
+              </div>
+            </div>
+            <div className="border h-full flex flex-row overflow-hidden">
+              <CodeEditor
+                  initialCode={
+                    problem.code_template
+                  }
+                  setCode={setCode}
+              />
+              {displayRefinedCode && <p>{refinedCode}</p>}
+
+            </div>
+          </div>
         </div>
       </ReactGridLayout>
       <style jsx>

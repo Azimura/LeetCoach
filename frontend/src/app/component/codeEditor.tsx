@@ -5,21 +5,13 @@ import { useEffect, useRef, useState } from "react";
 
 interface CodeEditorProps {
   initialCode: string;
-  refinedCode: string;
-  displayRefinedCode: boolean;
-  TestCode: Function;
-  SubmitCode: Function;
-  RefineCode: Function;
+  setCode: Function;
 
 }
 
 const CodeEditor = ({
   initialCode,
-  TestCode,
-  SubmitCode,
-  RefineCode,
-  displayRefinedCode,
-  refinedCode,
+  setCode,
 }: CodeEditorProps) => {
   let code = initialCode;
   const editorRef = useRef<editor.IStandaloneCodeEditor>(null);
@@ -44,40 +36,8 @@ const CodeEditor = ({
     ]);*/
   };
   return (
-    <div className="h-1/1 flex flex-col justify-between">
-      <div className="flex justify-between px-3 py-3 border-b">
-        <h1 className="font-bold text-2xl text-black"> Code Editor </h1>
-        <div>
-          <button
-            onClick={() => {
-              TestCode(code);
-            }}
-            className="text-black cursor-pointer self-end py-1.5 font-medium items-center whitespace-nowrap focus:outline-none inline-flex bg-fill-3 bg-[#000a200d] hover:bg-[#000a201a] h-[32px] select-none px-5 text-[12px] leading-[1.25rem] text-sm rounded-lg ml-2"
-          >
-            Run
-          </button>
-          <button
-            onClick={() => {
-              RefineCode(code);
-            }}
-            className="text-black cursor-pointer self-end py-1.5 font-medium items-center whitespace-nowrap focus:outline-none inline-flex bg-fill-3 bg-[#000a200d] hover:bg-[#000a201a] h-[32px] select-none px-5 text-[12px] leading-[1.25rem] text-sm rounded-lg ml-2"
-          >
-            Refine
-          </button>
-          <button
-            onClick={() => {
-              SubmitCode(code);
-            }}
-            className="cursor-pointer self-end py-1.5 font-medium items-center whitespace-nowrap focus:outline-none inline-flex bg-fill-3 bg-[#2db55d] hover:bg-[#269a4f] h-[32px] select-none px-5 text-[12px] leading-[1.25rem] text-white text-sm rounded-lg ml-2"
-          >
-            Submit
-          </button>
-        </div>
-      </div>
-        <div className="border h-full flex flex-row">
-            {!displayRefinedCode ? ( <Editor
-
-                height={"50%"}
+            <Editor
+                height={"100%"}
                 language="python"
                 value={code}
                 options={{
@@ -91,60 +51,12 @@ const CodeEditor = ({
                 }}
                 onChange={(value) => {
                     if (value) {
-                        code = value;
+                        setCode(value);
                     }
                 }}
                 className="pt-5"
                 onMount={onEditorMount}
-            />): (
-                <><Editor
-                    height={"50%"}
-                    defaultLanguage="python"
-                    defaultValue={initialCode}
-                    options={{
-                        fontSize: 14,
-                        minimap: {
-                            enabled: false,
-                        },
-
-                        autoClosingBrackets: "languageDefined",
-                        lineNumbers: "on",
-                    }}
-                    onChange={(value) => {
-                        if (value) {
-                            code = value;
-                        }
-                    }}
-                    className="pt-5"
-                    onMount={onEditorMount}
-                />
-                    <Editor
-                        height={"100%"}
-                        defaultLanguage="python"
-                        defaultValue={refinedCode}
-                        options={{
-                            fontSize: 14,
-                            minimap: {
-                                enabled: false,
-                            },
-                            autoClosingBrackets: "languageDefined",
-                            lineNumbers: "on",
-                            scrollbar: {
-                                vertical: "hidden",
-                            }
-                        }}
-                        onChange={(value) => {
-                            if (value) {
-                                code = value;
-                            }
-                        }}
-                        className="pt-5 h-full"
-                        onMount={onEditorMount}
-                    /></>
-            )}
-            </div>
-
-    </div>
+            />
   );
 };
 
