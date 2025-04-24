@@ -11,31 +11,23 @@ import {
   Transition,
   TransitionChild,
 } from "@headlessui/react";
+import { Editor } from "@monaco-editor/react";
 import { Fragment } from "react";
 
-interface ErrorMessage {
-  error?: string;
-  error_line?: number;
-  input?: string;
-  result?: number;
+interface RefinedCode {
+  message: string;
+  result: number;
 }
-interface Result {
-  error_message: ErrorMessage;
-  pass: number;
-  submission_id: number;
-  test_cases: number;
-  invalid?: boolean;
-}
-interface ResultModalProps {
+interface RefineCodeModalProps {
   visible: boolean;
   onClose: Function;
-  result: Result;
+  refinedCode: RefinedCode;
 }
-export default function ResultModal({
+export default function RefineCodeModal({
   visible,
-  result,
+  refinedCode,
   onClose,
-}: ResultModalProps) {
+}: RefineCodeModalProps) {
   const DisplayLoading = () => {
     return (
       <>
@@ -43,32 +35,43 @@ export default function ResultModal({
           icon={faCircleNotch}
           className="text-[128px] text-center text-black animate-spin"
         />
-        <p className="text-[32px] text-center text-black">Testing...</p>
+        <p className="text-[32px] text-center text-black">Refining Code...</p>
       </>
     );
   };
-  const DisplayResult = () => {
-    if (result.invalid) {
+  const DisplayRefinedCode = () => {
+    if (refinedCode.result) {
       return (
         <>
-          <FontAwesomeIcon
-            icon={faCircleXmark}
-            className="text-red-500 text-[64px]"
-          />
-          <p className="text-[32px] text-center text-red-500">Invalid input</p>
-        </>
-      );
-    }
-    if (result.error_message.result || result.pass == result.test_cases) {
-      return (
-        <>
-          <FontAwesomeIcon
-            icon={faCircleCheck}
-            className="text-green-500 text-[64px]"
-          />
-          <p className="text-[32px] text-center text-green-500">
-            {result.pass} / {result.test_cases} Passed
-          </p>
+          <div className="h-1/1 flex flex-col justify-between">
+            <div className="flex justify-between"></div>
+            <h1 className="font-bold text-2xl text-black"> Refined Code </h1>
+            <div className="h-6 bg-gray-300"></div>
+            <Editor
+              height={300}
+              defaultLanguage="python"
+              defaultValue={refinedCode.message}
+              options={{
+                fontSize: 14,
+                minimap: {
+                  enabled: false,
+                },
+                autoClosingBrackets: "languageDefined",
+                lineNumbers: "off",
+                readOnly: true,
+                renderLineHighlight: "none",
+                scrollbar: {
+                  vertical: "hidden",
+                },
+                selectionHighlight: false,
+                selectionClipboard: false,
+                scrollBeyondLastLine: false,
+                occurrencesHighlight: "off",
+                foldingHighlight: false,
+              }}
+              className=" bg-gray"
+            />
+          </div>
         </>
       );
     } else {
@@ -79,16 +82,11 @@ export default function ResultModal({
             className="text-red-500 text-[64px]"
           />
           <p className="text-[32px] text-center text-red-500">
-            {result.pass} / {result.test_cases} Passed
+            Failed To Refine Code
           </p>
           <div className="flex flex-col gap-2">
-            <label className="font-semibold text-black">Input: </label>
             <span className="bg-[#000a2008] border-[#0000000d] rounded-[5px] border-[1px] text-[#262626bf] font-[.75rem]  p-3">
-              {result.error_message.input}
-            </span>
-            <label className="font-semibold text-black">Error: </label>
-            <span className="bg-[#000a2008] border-[#0000000d] rounded-[5px] border-[1px] text-[#262626bf] font-[.75rem]  p-3">
-              {result.error_message.error}
+              {refinedCode.message}
             </span>
           </div>
         </>
@@ -136,8 +134,8 @@ export default function ResultModal({
                       onClose();
                     }}
                   />
-                  {Object.keys(result).length
-                    ? DisplayResult()
+                  {Object.keys(refinedCode).length
+                    ? DisplayRefinedCode()
                     : DisplayLoading()}
                 </DialogPanel>
               </TransitionChild>

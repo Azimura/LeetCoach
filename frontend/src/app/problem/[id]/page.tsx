@@ -10,6 +10,7 @@ import { getCookie } from "cookies-next/client";
 import { GetProblem, Refine, StartProgress, Submit, Test } from "./api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClockFour } from "@fortawesome/free-regular-svg-icons";
+import RefineCodeModal from "@/app/component/refinedCodeModal";
 
 interface ProblemResponse {
   code_template: string;
@@ -29,7 +30,9 @@ export default function Problem({
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
   const [displayChatbox, setDisplayChatbox] = useState(false);
   const [displayResult, setDisplayResult] = useState(false);
+  const [displayRefinedCode, setDisplayRefinedCode] = useState(false);
   const [result, setResult] = useState<any>({});
+  const [refinedCode, setRefinedCode] = useState<any>({});
   const [problem, setProblem] = useState<ProblemResponse>({
     content: "",
     code_template: "",
@@ -59,10 +62,12 @@ export default function Problem({
   };
 
   const RefineCode = async (code: string) => {
+    setResult({});
+    setDisplayRefinedCode(true);
     const userID = Number(getCookie("userID"));
     const { id } = await params;
     const result = await Refine(userID, id, code);
-    console.log(result);
+    setRefinedCode(result);
   };
 
   const RetrieveProblem = async () => {
@@ -131,6 +136,13 @@ export default function Problem({
         }}
         result={result}
       />
+      {/*<RefineCodeModal
+        visible={displayRefinedCode}
+        onClose={() => {
+          setDisplayRefinedCode(false);
+        }}
+        refinedCode={refinedCode}
+      />*/}
       <div className="tooltip-container absolute bottom-[2rem] right-[3rem] z-10">
         <button
           aria-describedby="help-tooltip"
@@ -147,10 +159,19 @@ export default function Problem({
         className="absolute z-10 bottom-[10px] right-[100px]"
       />
       <div className="h-10 flex items-center justify-center p-2">
-        <div className="flex items-center gap-2">
-          <FontAwesomeIcon icon={faClockFour} className="text-gray-600" />
-          <p className="text-gray-600">{FormatTime(time)}</p>
-        </div>
+        {!timeUp ? (
+          <div className="flex items-center gap-2">
+            <FontAwesomeIcon icon={faClockFour} className="text-gray-600" />
+            <p className="text-gray-600">{FormatTime(time)}</p>
+          </div>
+        ) : (
+          <button
+            onClick={() => {}}
+            className="cursor-pointer self-end justify-self-end py-1.5 font-medium items-center whitespace-nowrap focus:outline-none inline-flex bg-fill-3 bg-[#2db55d] hover:bg-[#269a4f] h-[32px] select-none px-5 text-[12px] leading-[1.25rem] text-white text-sm rounded-lg ml-2"
+          >
+            Next Problem
+          </button>
+        )}
       </div>
       <ReactGridLayout
         className="layout overflow-hidden"
@@ -173,7 +194,7 @@ export default function Problem({
         <div className="bg-white p-0 m-0" key={"Code Editor"}>
           <CodeEditor
             initialCode={
-              "def removeDuplicates(nums):\n    i = 0\n    for j in range(1, len(nums)):\n        if nums[j] != nums[i]:\n            i += 1\n            nums[i] = nums[j]\n    return i + 1"
+              "def removeDuplicates(nums):\n    i = 0\n    for j in range(1, len(nums)):\n        if numssssssss[j] != nums[i]:\n            i += 1\n            nums[i] = nums[j]\n    return i + 1;;;;;;;"
             }
             TestCode={TestCode}
             SubmitCode={SubmitCode}

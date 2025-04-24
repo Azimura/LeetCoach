@@ -8,6 +8,8 @@ interface CodeEditorProps {
   TestCode: Function;
   SubmitCode: Function;
   RefineCode: Function;
+  displayRefinedCode: boolean;
+  refinedCode: string;
 }
 
 const CodeEditor = ({
@@ -15,8 +17,10 @@ const CodeEditor = ({
   TestCode,
   SubmitCode,
   RefineCode,
+  displayRefinedCode,
+  refinedCode,
 }: CodeEditorProps) => {
-  let code = initialCode;
+  const [code, setCode] = useState<string>(initialCode);
   const editorRef = useRef<editor.IStandaloneCodeEditor>(null);
 
   const onEditorMount = (
@@ -46,7 +50,6 @@ const CodeEditor = ({
         <div>
           <button
             onClick={() => {
-              console.log(code);
               TestCode(code);
             }}
             className="text-black cursor-pointer self-end py-1.5 font-medium items-center whitespace-nowrap focus:outline-none inline-flex bg-fill-3 bg-[#000a200d] hover:bg-[#000a201a] h-[32px] select-none px-5 text-[12px] leading-[1.25rem] text-sm rounded-lg ml-2"
@@ -71,27 +74,30 @@ const CodeEditor = ({
           </button>
         </div>
       </div>
-      <Editor
-        height={"100%"}
-        defaultLanguage="python"
-        defaultValue={initialCode}
-        options={{
-          fontSize: 14,
-          minimap: {
-            enabled: false,
-          },
-          autoClosingBrackets: "languageDefined",
-          lineNumbers: "on",
-        }}
-        onChange={(value) => {
-          console.log(value);
-          if (value) {
-            code = value;
-          }
-        }}
-        className="pt-5"
-        onMount={onEditorMount}
-      />
+      {!displayRefinedCode ? (
+        <Editor
+          height={"100%"}
+          defaultLanguage="python"
+          defaultValue={initialCode}
+          options={{
+            fontSize: 14,
+            minimap: {
+              enabled: false,
+            },
+            autoClosingBrackets: "languageDefined",
+            lineNumbers: "on",
+          }}
+          onChange={(value) => {
+            if (value != undefined) {
+              setCode(value);
+            }
+          }}
+          className="pt-5"
+          onMount={onEditorMount}
+        />
+      ) : (
+        <></>
+      )}
     </div>
   );
 };
