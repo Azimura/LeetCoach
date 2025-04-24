@@ -1,6 +1,7 @@
 import json
 import threading
 
+import redis
 import requests
 from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
@@ -17,6 +18,7 @@ chat_app.config.from_object(Config)
 init_db(chat_app)
 CORS(chat_app)
 
+redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
 ongoing_streams = {}
 stream_counter = 0
 streams_lock = threading.Lock()
@@ -130,3 +132,7 @@ def stream(stream_id):
         return jsonify({"error": "Invalid or expired stream ID"}), 404
 
     return Response(generator, mimetype='text/event-stream')
+
+@chat_app.route('/')
+def index():
+    return 'WELCOME!'
