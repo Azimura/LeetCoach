@@ -18,12 +18,11 @@ const CodeEditor = ({
   TestCode,
   SubmitCode,
   RefineCode,
-                        displayRefinedCode,
-    refinedCode,
+  displayRefinedCode,
+  refinedCode,
 }: CodeEditorProps) => {
   let code = initialCode;
   const editorRef = useRef<editor.IStandaloneCodeEditor>(null);
-    console.log(displayRefinedCode);
   const onEditorMount = (
     editor: editor.IStandaloneCodeEditor,
     monaco: Monaco
@@ -77,9 +76,10 @@ const CodeEditor = ({
       </div>
         <div className="border h-full flex flex-row">
             {!displayRefinedCode ? ( <Editor
+
                 height={"50%"}
-                defaultLanguage="python"
-                defaultValue={initialCode}
+                language="python"
+                value={code}
                 options={{
                     fontSize: 14,
                     minimap: {
@@ -90,7 +90,6 @@ const CodeEditor = ({
                     lineNumbers: "on",
                 }}
                 onChange={(value) => {
-                    console.log(value);
                     if (value) {
                         code = value;
                     }
@@ -112,7 +111,6 @@ const CodeEditor = ({
                         lineNumbers: "on",
                     }}
                     onChange={(value) => {
-                        console.log(value);
                         if (value) {
                             code = value;
                         }
@@ -136,7 +134,6 @@ const CodeEditor = ({
                             }
                         }}
                         onChange={(value) => {
-                            console.log(value);
                             if (value) {
                                 code = value;
                             }

@@ -7,7 +7,7 @@ import Chatbox from "@/app/component/chatBox";
 import ProblemText from "@/app/component/problemText";
 import ResultModal from "@/app/component/resultModal";
 import { getCookie } from "cookies-next/client";
-import { GetProblem, Refine, StartProgress, Submit, Test } from "./api";
+import {Chat, GetProblem, Refine, StartProgress, Submit, Test} from "./api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClockFour } from "@fortawesome/free-regular-svg-icons";
 
@@ -34,6 +34,8 @@ export default function Problem({
   const [error, setError] = useState("");
   const [result, setResult] = useState({});
   const [refinedCode, setRefinedCode] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [streamId, setStreamId] = useState(null);
   const [problem, setProblem] = useState<ProblemResponse>({
     content: "",
     code_template: "",
@@ -80,8 +82,14 @@ export default function Problem({
   const RetrieveProblem = async () => {
     const { id } = await params;
     const problem = await GetProblem(id);
+    console.log(problem);
     setProblem(problem);
   };
+
+  const SendMessage = async (message: string) => {
+    const data = await Chat(message);
+    setStreamId(data.stream_id);
+  }
 
   useEffect(() => {
     RetrieveProblem();
@@ -157,6 +165,9 @@ export default function Problem({
       <Chatbox
         active={displayChatbox}
         className="absolute z-10 bottom-[10px] right-[100px]"
+        streamId={streamId}
+        sendMessage={SendMessage}
+        setStreamId={setStreamId}
       />
       <div className="h-10 flex items-center justify-center p-2">
         <div className="flex items-center gap-2">
@@ -185,7 +196,7 @@ export default function Problem({
         <div className="bg-white p-0 m-0" key={"Code Editor"}>
           <CodeEditor
             initialCode={
-              "def removeDuplicates(nums):\n    i = 0\n    for j in range(1, len(nums)):\n        if nums[j] != nums[i]:\n            i += 1\n            nums[i] = nums[j]\n    return i + 1"
+             problem.code_template
             }
             TestCode={TestCode}
             SubmitCode={SubmitCode}

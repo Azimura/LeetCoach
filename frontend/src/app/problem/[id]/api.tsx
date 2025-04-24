@@ -88,3 +88,14 @@ export async function Refine(userID: number, problemID: number, code: string) {
 
   return await response.json();
 }
+
+export async function Chat(message: string) {
+  const response = await fetch('http://10.152.70.67:4999/chat/message', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ query: message }), // Use the text from the userMessage object
+  });
+  return await response.json();
+}
