@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Chat</title>
+    <style>
+        #chat-container {
+            width: 80%;
+            margin: 20px auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 300px;
+            overflow-y: auto;
+        }
+        #user-input {
+            width: 78%;
+            padding: 8px;
+            margin-top: 10px;
+        }
+        button {
+            padding: 8px 15px;
+            margin-top: 10px;
+        }
+        .user-message {
+            background-color: #f0f0f0;
+            padding: 8px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+        }
+        .bot-message {
+            background-color: #e0f7fa;
+            padding: 8px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+<div id="chat-container"></div>
+<div>
+    <input type="text" id="user-id" placeholder="User ID">
+    <input type="text" id="problem-id" placeholder="Problem ID">
+    <input type="text" id="user-input" placeholder="Enter your query">
+    <button onclick="sendMessage()">Send</button>
+</div>
+
+<script>
+    const chatContainer = document.getElementById('chat-container');
+    const userIdInput = document.getElementById('user-id');
+    const problemIdInput = document.getElementById('problem-id');
+    const userInput = document.getElementById('user-input');
+
+    function sendMessage() {
+        const userId = userIdInput.value;
+        const problemId = problemIdInput.value;
+        const query = userInput.value;
+
+        if (query.trim() === "") {
+            return;
+        }
+
+        appendMessage('user-message', `You: ${query}`);
+        userInput.value = "";
+
+        fetch('http://127.0.0.1:4999/stream', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ user_id: userId, problem_id: problemId, query: query })
+        })
+            .then(response => {
+                const source = new EventSource(response.url);
+
+                let botResponse = "";
+                source.onmessage = event => {
+                    if (event.data === "[DONE]") {
+                        source.close();
+                        appendMessage('bot-message', `Bot: ${botResponse}`);
+                    } else {
+                        botResponse += event.data;
+                        // Update the last bot message with the new chunk
+                        const lastBotMessage = chatContainer.querySelector('.bot-message:last-child');
+                        if (lastBotMessage) {
+                            lastBotMessage.textContent = `Bot: ${botResponse}`;
+                        } else {
+                            appendMessage('bot-message', `Bot: ${botResponse}`);
+                        }
+                    }
+                };
+
+                source.onerror = error => {
+                    console.error("EventSource failed:", error);
+                    appendMessage('bot-message', "Bot: Error connecting to the server.");
+                    source.close();
+                };
+            })
+            .catch(error => {
+                console.error("Fetch error:", error);
+                appendMessage('bot-message', "Bot: Error sending request.");
+            });
+    }
+
+    function appendMessage(className, message) {
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add(className);
+        messageDiv.textContent = message;
+        chatContainer.appendChild(messageDiv);
+        chatContainer.scrollTop = chatContainer.scrollHeight; // Scroll to the bottom
+    }
+</script>
+</body>
+</html>

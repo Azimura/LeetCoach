@@ -1,27 +1,19 @@
+"use client";
 import Image from "next/image";
 import Icon from "@/app/favicon.ico";
-import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
+import {useSearchParams} from "next/navigation";
+import {LoginUser} from "@/app/problem/[id]/api";
 
 const formAction = async (formData: FormData) => {
-  "use server";
-  const response = await fetch("http://127.0.0.1:5000/user", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      username: formData.get("username"),
-    }),
-  });
-  const { user_id, username } = await response.json();
-
-  const cookieStore = await cookies();
-  cookieStore.set("userID", user_id);
-  cookieStore.set("username", username);
-  redirect("/problem/26");
+  const id = formData.get("username");
+  if(id) {
+    LoginUser(id.toString());
+  }
 };
 export default function Login() {
+  const searchParams = useSearchParams();
+  const studentID = searchParams.get("id");
+
   return (
     <form
       action={formAction}
@@ -37,6 +29,8 @@ export default function Login() {
           type="text"
           name="username"
           placeholder="Enter username"
+          value={studentID ? studentID : ""}
+          readOnly={studentID != null}
         />
       </div>
       <button className="cursor-pointer w-[512px] rounded-lg mt-[20px] relative px-10 py-3.5 overflow-hidden group bg-gradient-to-r from-gray-700 to-black relative hover:bg-gradient-to-r hover:from-gray-600 hover:to-black text-white transition-all ease-out duration-300">

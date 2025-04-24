@@ -29,7 +29,11 @@ export default function Problem({
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
   const [displayChatbox, setDisplayChatbox] = useState(false);
   const [displayResult, setDisplayResult] = useState(false);
-  const [result, setResult] = useState<any>({});
+  const [displayError, setDisplayError] = useState(false);
+  const [displayRefinedCode, setDisplayRefinedCode] = useState(false);
+  const [error, setError] = useState("");
+  const [result, setResult] = useState({});
+  const [refinedCode, setRefinedCode] = useState("");
   const [problem, setProblem] = useState<ProblemResponse>({
     content: "",
     code_template: "",
@@ -63,6 +67,14 @@ export default function Problem({
     const { id } = await params;
     const result = await Refine(userID, id, code);
     console.log(result);
+    if (result.result) {
+      setRefinedCode(result.message);
+      setDisplayRefinedCode(true);
+      console.log("ran");
+    } else {
+      setError(result.message);
+      setDisplayError(true);
+    }
   };
 
   const RetrieveProblem = async () => {
@@ -178,6 +190,8 @@ export default function Problem({
             TestCode={TestCode}
             SubmitCode={SubmitCode}
             RefineCode={RefineCode}
+            displayRefinedCode={displayRefinedCode}
+            refinedCode={refinedCode}
           />
         </div>
       </ReactGridLayout>

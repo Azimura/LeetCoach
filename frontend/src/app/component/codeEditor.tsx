@@ -5,9 +5,12 @@ import { useEffect, useRef, useState } from "react";
 
 interface CodeEditorProps {
   initialCode: string;
+  refinedCode: string;
+  displayRefinedCode: boolean;
   TestCode: Function;
   SubmitCode: Function;
   RefineCode: Function;
+
 }
 
 const CodeEditor = ({
@@ -15,10 +18,12 @@ const CodeEditor = ({
   TestCode,
   SubmitCode,
   RefineCode,
+                        displayRefinedCode,
+    refinedCode,
 }: CodeEditorProps) => {
   let code = initialCode;
   const editorRef = useRef<editor.IStandaloneCodeEditor>(null);
-
+    console.log(displayRefinedCode);
   const onEditorMount = (
     editor: editor.IStandaloneCodeEditor,
     monaco: Monaco
@@ -46,7 +51,6 @@ const CodeEditor = ({
         <div>
           <button
             onClick={() => {
-              console.log(code);
               TestCode(code);
             }}
             className="text-black cursor-pointer self-end py-1.5 font-medium items-center whitespace-nowrap focus:outline-none inline-flex bg-fill-3 bg-[#000a200d] hover:bg-[#000a201a] h-[32px] select-none px-5 text-[12px] leading-[1.25rem] text-sm rounded-lg ml-2"
@@ -71,27 +75,78 @@ const CodeEditor = ({
           </button>
         </div>
       </div>
-      <Editor
-        height={"100%"}
-        defaultLanguage="python"
-        defaultValue={initialCode}
-        options={{
-          fontSize: 14,
-          minimap: {
-            enabled: false,
-          },
-          autoClosingBrackets: "languageDefined",
-          lineNumbers: "on",
-        }}
-        onChange={(value) => {
-          console.log(value);
-          if (value) {
-            code = value;
-          }
-        }}
-        className="pt-5"
-        onMount={onEditorMount}
-      />
+        <div className="border h-full flex flex-row">
+            {!displayRefinedCode ? ( <Editor
+                height={"50%"}
+                defaultLanguage="python"
+                defaultValue={initialCode}
+                options={{
+                    fontSize: 14,
+                    minimap: {
+                        enabled: false,
+                    },
+
+                    autoClosingBrackets: "languageDefined",
+                    lineNumbers: "on",
+                }}
+                onChange={(value) => {
+                    console.log(value);
+                    if (value) {
+                        code = value;
+                    }
+                }}
+                className="pt-5"
+                onMount={onEditorMount}
+            />): (
+                <><Editor
+                    height={"50%"}
+                    defaultLanguage="python"
+                    defaultValue={initialCode}
+                    options={{
+                        fontSize: 14,
+                        minimap: {
+                            enabled: false,
+                        },
+
+                        autoClosingBrackets: "languageDefined",
+                        lineNumbers: "on",
+                    }}
+                    onChange={(value) => {
+                        console.log(value);
+                        if (value) {
+                            code = value;
+                        }
+                    }}
+                    className="pt-5"
+                    onMount={onEditorMount}
+                />
+                    <Editor
+                        height={"100%"}
+                        defaultLanguage="python"
+                        defaultValue={refinedCode}
+                        options={{
+                            fontSize: 14,
+                            minimap: {
+                                enabled: false,
+                            },
+                            autoClosingBrackets: "languageDefined",
+                            lineNumbers: "on",
+                            scrollbar: {
+                                vertical: "hidden",
+                            }
+                        }}
+                        onChange={(value) => {
+                            console.log(value);
+                            if (value) {
+                                code = value;
+                            }
+                        }}
+                        className="pt-5 h-full"
+                        onMount={onEditorMount}
+                    /></>
+            )}
+            </div>
+
     </div>
   );
 };
