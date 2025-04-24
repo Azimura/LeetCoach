@@ -1,33 +1,22 @@
+from flask import Flask, request, Response, jsonify
+from flask_cors import CORS
+import requests
 import json
 import threading
 
-import redis
-import requests
-from flask import Flask, request, jsonify, Response
-from flask_cors import CORS
+app = Flask(__name__)
+CORS(app)
 
-from chat_app.refine import refine_bp
-from chat_app.util import build_prompt, CHAT_MODEL, LLM_CHAT_URL
-from models import init_db, db
-from config import Config
-from models.models import Problem, Message
+OLLAMA_URL = "http://localhost:11434/api/chat"
+OLLAMA_MODEL = "phi4"
 
-chat_app = Flask(__name__)
-chat_app.config.from_object(Config)
-
-init_db(chat_app)
-CORS(chat_app)
-
-redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
 ongoing_streams = {}
 stream_counter = 0
 streams_lock = threading.Lock()
 
-chat_app.register_blueprint(refine_bp)
 
-
-@chat_app.route('/chat/message', methods=['POST'])
-def initiate_chat(history_limit=10):
+@app.route('/chat/message', methods=['POST'])
+def initiate_chat():
     global stream_counter
     data = request.get_json()
     user_id = 1
@@ -59,7 +48,7 @@ def initiate_chat(history_limit=10):
     for turn in history:
         history_blocks.append(f"{turn.role}: {turn.content}")
 
-    messages = build_prompt([problem_doc], history_blocks, query)
+    messages_for_ollama = build_prompt([problem_doc], history_blocks, query)
 
     with streams_lock:
         stream_id = str(stream_counter)
@@ -69,12 +58,12 @@ def initiate_chat(history_limit=10):
         full_response = ""
         successful_stream = False
         payload = {
-            "model": CHAT_MODEL,
-            "messages": messages,
+            "model": OLLAMA_MODEL,
+            "messages": [{"role": "user", "content": user_query}],
             "stream": True
         }
         try:
-            response = requests.post(LLM_CHAT_URL, json=payload, stream=True)
+            response = requests.post(OLLAMA_URL, json=payload, stream=True)
             response.raise_for_status()
             for line in response.iter_lines():
                 if line:
@@ -100,20 +89,11 @@ def initiate_chat(history_limit=10):
                 if stream_id in ongoing_streams:
                     del ongoing_streams[stream_id]
                     print(f"Cleaned up stream_id: {stream_id}")
-
+                else:
+                    print(f"Warning: Tried to cleanup stream_id {stream_id} but it was not found.")
             if successful_stream:
-                with chat_app.app_context():
-                    try:
-                        db.session.add_all([
-                            Message(user_id=user_id, problem_id=internal_problem_id, role="user", content=query),
-                            Message(user_id=user_id, problem_id=internal_problem_id, role="assistant",
-                                    content=full_response),
-                        ])
-                        db.session.commit()
-                        print(f"Saved conversation.")
-                    except Exception as save_error:
-                        db.session.rollback()
-                        print(f"Error saving conversation: {save_error}")
+                pass
+                # print("Full response received:", full_response)
 
     with streams_lock:
         ongoing_streams[stream_id] = generate()
@@ -121,7 +101,7 @@ def initiate_chat(history_limit=10):
     return jsonify({"stream_id": stream_id})
 
 
-@chat_app.route('/chat/stream/<stream_id>')
+@app.route('/chat/stream/<stream_id>')
 def stream(stream_id):
     generator = None
     with streams_lock:
@@ -133,6 +113,7 @@ def stream(stream_id):
 
     return Response(generator, mimetype='text/event-stream')
 
-@chat_app.route('/')
-def index():
-    return 'WELCOME!'
+
+if __name__ == '__main__':
+    print("Starting Flask app. Use 'flask --app <your_file_name> run' for better dev server features.")
+    app.run(host='0.0.0.0', port=4999, debug=False)

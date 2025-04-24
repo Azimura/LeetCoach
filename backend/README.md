@@ -71,3 +71,6 @@ By default, the app runs at:
 ```bash
 http://127.0.0.1:4999/
 ```
+
+gunicorn chat_app.app:chat_app w 1 -k gevent --bind 0.0.0.0:4999
+gunicorn main_app.app:main_app w 8 --bind 0.0.0.0:5000
