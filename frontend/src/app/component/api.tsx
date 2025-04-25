@@ -1,7 +1,38 @@
 "use server";
 
-import {cookies} from "next/headers";
-import {redirect} from "next/navigation";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+
+export async function SkipProblem(problemID: number) {
+  const cookieStore = await cookies();
+  const completedProblemsJSON = cookieStore.get("completedProblems");
+  console.log(completedProblemsJSON);
+  if (completedProblemsJSON) {
+    const completedProblem = JSON.parse(completedProblemsJSON.value);
+    completedProblem.push(problemID);
+    cookieStore.set("completedProblems", JSON.stringify(completedProblem));
+    console.log(completedProblem);
+  }
+  return MoveToNextProblem();
+}
+
+export async function MoveToNextProblem() {
+  const cookieStore = await cookies();
+  let completedProblem = [];
+  const completedProblemsJSON = cookieStore.get("completedProblems");
+  if (completedProblemsJSON) {
+    completedProblem = JSON.parse(completedProblemsJSON.value);
+  }
+  if (!completedProblem.includes("26")) {
+    return redirect("/problem/26");
+  } else if (!completedProblem.includes("88")) {
+    return redirect("/problem/88");
+  } else if (!completedProblem.includes("129")) {
+    return redirect("/problem/129");
+  } else {
+    //TODO: redirect to exit survey
+  }
+}
 
 export async function LoginUser(id: string) {
   const response = await fetch("http://10.152.70.67:5000/user", {
@@ -18,12 +49,17 @@ export async function LoginUser(id: string) {
   const cookieStore = await cookies();
   cookieStore.set("userID", user_id);
   cookieStore.set("username", username);
-  redirect("/problem/26");
+  const completedProblem = [-1];
+  cookieStore.set("completedProblems", JSON.stringify(completedProblem));
+  return MoveToNextProblem();
 }
 export async function GetProblem(problemID: number) {
-  const response = await fetch(`http://10.152.70.67:5000/problem/${problemID}`, {
-    method: "GET",
-  });
+  const response = await fetch(
+    `http://10.152.70.67:5000/problem/${problemID}`,
+    {
+      method: "GET",
+    }
+  );
   return await response.json();
 }
 
@@ -56,6 +92,13 @@ export async function Submit(problemID: number, userID: number, code: string) {
     }),
   });
 
+  const cookieStore = await cookies();
+  const completedProblemsJSON = cookieStore.get("completedProblems");
+  if (completedProblemsJSON) {
+    const completedProblem = JSON.parse(completedProblemsJSON.value);
+    completedProblem.push(problemID);
+    cookieStore.set("completedProblems", JSON.stringify(completedProblem));
+  }
   return await response.json();
 }
 
@@ -90,10 +133,10 @@ export async function Refine(userID: number, problemID: number, code: string) {
 }
 
 export async function Chat(message: string) {
-  const response = await fetch('http://10.152.70.67:4999/chat/message', {
-    method: 'POST',
+  const response = await fetch("http://10.152.70.67:4999/chat/message", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({ query: message }), // Use the text from the userMessage object
   });

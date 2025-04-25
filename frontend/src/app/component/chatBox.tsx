@@ -16,38 +16,51 @@ interface ChatboxProps {
   sendMessage: Function;
   setStreamId: Function;
 }
-export default function Chatbox({ className, active, streamId, setStreamId, sendMessage }: ChatboxProps) {
+export default function Chatbox({
+  className,
+  active,
+  streamId,
+  setStreamId,
+  sendMessage,
+}: ChatboxProps) {
   className += `fixed bottom-[calc(4rem+1.5rem)] right-0 mr-4 bg-white p-6 rounded-lg border border-[#e5e7eb] w-[1000px] h-[634px] whitespace-normal`;
-  const inputBox = useRef<HTMLTextAreaElement>(null);
+  const inputBox = useRef<HTMLInputElement>(null);
   const messageEnd = useRef<HTMLDivElement>(null);
 
   const [messageText, setMessageText] = useState<string>("");
-  const [receivedMessages, setMessages] = useState<Array<Message>>([
-
-  ]);
+  const [receivedMessages, setMessages] = useState<Array<Message>>([]);
   const messageTextIsEmpty = messageText.trim().length === 0;
   const eventSourceRef = useRef(null);
   const ollamaResponseRef = useRef("");
 
   const handleFormSubmission = (event: any) => {
     event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const message = formData.get("message")?.toString();
-    setMessages((prevMessages) => [...prevMessages, { text: message, sender: 'me', isStreaming: false, isError: false, isComplete: true }]);
-    sendMessage(message);
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      {
+        text: messageText,
+        sender: "me",
+        isStreaming: false,
+        isError: false,
+        isComplete: true,
+      },
+    ]);
+    sendMessage(messageText);
+    setMessageText("");
     ollamaResponseRef.current = "";
   };
 
-
   useEffect(() => {
     if (streamId) {
-      const eventSource = new EventSource(`http://10.152.70.67:4999/chat/stream/${streamId}`);
+      const eventSource = new EventSource(
+        `http://10.152.70.67:4999/chat/stream/${streamId}`
+      );
       eventSourceRef.current = eventSource;
 
       eventSource.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
-          console.log('SSE message received:', data); // Log all incoming SSE data
+          console.log("SSE message received:", data); // Log all incoming SSE data
 
           // Explicitly check for the completion signal from the backend (empty object)
           if (Object.keys(data).length === 0) {
@@ -60,53 +73,103 @@ export default function Chatbox({ className, active, streamId, setStreamId, send
             ollamaResponseRef.current += data.chunk;
             setMessages((prevMessages) => {
               // Find the index of the message currently being streamed using the isStreaming flag
-              const streamingOllamaIndex = prevMessages.findIndex(msg => msg.sender === 'ollama' && msg.isStreaming);
+              const streamingOllamaIndex = prevMessages.findIndex(
+                (msg) => msg.sender === "ollama" && msg.isStreaming
+              );
 
               if (streamingOllamaIndex !== -1) {
                 // Update the text of the streaming message
                 const newMessages = [...prevMessages];
-                newMessages[streamingOllamaIndex] = { ...newMessages[streamingOllamaIndex], text: ollamaResponseRef.current };
+                newMessages[streamingOllamaIndex] = {
+                  ...newMessages[streamingOllamaIndex],
+                  text: ollamaResponseRef.current,
+                };
                 return newMessages;
               } else {
                 // This case should ideally not happen if the placeholder is added correctly in handleSubmit,
                 // but as a fallback, add a new message if somehow missed.
-                console.warn("onmessage setMessages: Streaming message placeholder not found during chunk update. Adding a new message.");
-                return [...prevMessages, { text: ollamaResponseRef.current, sender: 'ollama', isStreaming: true, isError: false, isComplete: false }]; // Ensure all flags are set
+                console.warn(
+                  "onmessage setMessages: Streaming message placeholder not found during chunk update. Adding a new message."
+                );
+                return [
+                  ...prevMessages,
+                  {
+                    text: ollamaResponseRef.current,
+                    sender: "ollama",
+                    isStreaming: true,
+                    isError: false,
+                    isComplete: false,
+                  },
+                ]; // Ensure all flags are set
               }
             });
           } else if (data.error) {
             // Handle stream-specific errors by updating the streaming message to an error state
-            console.error('Stream reported an error:', data.error);
+            console.error("Stream reported an error:", data.error);
             setMessages((prevMessages) => {
-              const streamingOllamaIndex = prevMessages.findIndex(msg => msg.sender === 'ollama' && msg.isStreaming);
-              if(streamingOllamaIndex !== -1) {
+              const streamingOllamaIndex = prevMessages.findIndex(
+                (msg) => msg.sender === "ollama" && msg.isStreaming
+              );
+              if (streamingOllamaIndex !== -1) {
                 const newMessages = [...prevMessages];
-                newMessages[streamingOllamaIndex] = { ...newMessages[streamingOllamaIndex], text: `Error in stream: ${data.error}`, sender: 'ollama', isError: true, isStreaming: false, isComplete: false };
+                newMessages[streamingOllamaIndex] = {
+                  ...newMessages[streamingOllamaIndex],
+                  text: `Error in stream: ${data.error}`,
+                  sender: "ollama",
+                  isError: true,
+                  isStreaming: false,
+                  isComplete: false,
+                };
                 return newMessages;
               }
               // Fallback
-              console.error("onmessage error setMessages: Error message received but no streaming message found to update.");
+              console.error(
+                "onmessage error setMessages: Error message received but no streaming message found to update."
+              );
               return [
                 ...prevMessages,
-                { text: `Error in stream: ${data.error}`, sender: 'ollama', isError: true, isStreaming: false, isComplete: false },
+                {
+                  text: `Error in stream: ${data.error}`,
+                  sender: "ollama",
+                  isError: true,
+                  isStreaming: false,
+                  isComplete: false,
+                },
               ];
             });
             eventSource.close();
             setStreamId(null);
           }
         } catch (error) {
-          console.error('Error parsing SSE event:', error, event.data);
+          console.error("Error parsing SSE event:", error, event.data);
           setMessages((prevMessages) => {
-            const streamingOllamaIndex = prevMessages.findIndex(msg => msg.sender === 'ollama' && msg.isStreaming);
-            if(streamingOllamaIndex !== -1) {
+            const streamingOllamaIndex = prevMessages.findIndex(
+              (msg) => msg.sender === "ollama" && msg.isStreaming
+            );
+            if (streamingOllamaIndex !== -1) {
               const newMessages = [...prevMessages];
-              newMessages[streamingOllamaIndex] = { ...newMessages[streamingOllamaIndex], text: 'Error processing response from server.', sender: 'ollama', isError: true, isStreaming: false, isComplete: false };
+              newMessages[streamingOllamaIndex] = {
+                ...newMessages[streamingOllamaIndex],
+                text: "Error processing response from server.",
+                sender: "ollama",
+                isError: true,
+                isStreaming: false,
+                isComplete: false,
+              };
               return newMessages;
             }
-            console.error("onmessage parse error setMessages: Parsing error but no streaming message found to update.");
+            console.error(
+              "onmessage parse error setMessages: Parsing error but no streaming message found to update."
+            );
             return [
               ...prevMessages,
-              { text: 'Error processing response from server.', sender: 'ollama', isError: true, isStreaming: false, isComplete: false },
+              {
+                text: "Error processing response from server.",
+                sender: "ollama",
+                isError: true,
+                isStreaming: false,
+                isComplete: false,
+              },
             ];
           });
           eventSource.close();
@@ -115,48 +178,79 @@ export default function Chatbox({ className, active, streamId, setStreamId, send
       };
 
       eventSource.onerror = (error) => {
-        console.error('SSE error event triggered:', error);
-        console.log('Attempting to handle SSE error.');
+        console.error("SSE error event triggered:", error);
+        console.log("Attempting to handle SSE error.");
         // This handler is for connection-level errors.
         // Update the streaming message to a connection error state, BUT check if it was already completed.
         setMessages((prevMessages) => {
-          const streamingOllamaIndex = prevMessages.findIndex(msg => msg.sender === 'ollama' && msg.isStreaming);
+          const streamingOllamaIndex = prevMessages.findIndex(
+            (msg) => msg.sender === "ollama" && msg.isStreaming
+          );
           let newMessages = [...prevMessages];
 
-          if(streamingOllamaIndex !== -1) {
+          if (streamingOllamaIndex !== -1) {
             // Found the message that was streaming
             // Check if this message has already been marked as complete by onclose
             if (newMessages[streamingOllamaIndex].isComplete) {
-              console.log("onerror: Stream already marked as complete by onclose, ignoring error for this message.");
+              console.log(
+                "onerror: Stream already marked as complete by onclose, ignoring error for this message."
+              );
               // If already complete, do nothing to this message's error state
               return prevMessages; // Return previous state as no change needed for this message
             } else {
               // If not complete, mark it as an error
-              console.log("onerror: Stream not complete, marking message as error.");
+              console.log(
+                "onerror: Stream not complete, marking message as error."
+              );
               newMessages[streamingOllamaIndex] = {
                 ...newMessages[streamingOllamaIndex],
-                text: newMessages[streamingOllamaIndex].text || 'Connection error with the server.', // Keep existing text if any, otherwise set default error
+                text:
+                  newMessages[streamingOllamaIndex].text ||
+                  "Connection error with the server.", // Keep existing text if any, otherwise set default error
                 isError: true,
                 isStreaming: false, // No longer streaming
-                isComplete: false // Ensure isComplete is false in case of error
+                isComplete: false, // Ensure isComplete is false in case of error
               };
-              console.log('onerror setMessages: updated newMessages (error)', newMessages);
+              console.log(
+                "onerror setMessages: updated newMessages (error)",
+                newMessages
+              );
               return newMessages;
             }
           } else {
             // If no streaming message is found with isStreaming: true, this might be a general connection error not tied to a specific active stream.
-            console.warn("onerror setMessages: No actively streaming message found to update. Adding a new error message.");
+            console.warn(
+              "onerror setMessages: No actively streaming message found to update. Adding a new error message."
+            );
             // Add a new error message at the bottom, but avoid duplicates for clarity
-            if (!prevMessages.some(msg => msg.text === 'Connection error with the server.' && msg.isError && !msg.isStreaming && !msg.isComplete)) {
+            if (
+              !prevMessages.some(
+                (msg) =>
+                  msg.text === "Connection error with the server." &&
+                  msg.isError &&
+                  !msg.isStreaming &&
+                  !msg.isComplete
+              )
+            ) {
               newMessages = [
                 ...prevMessages,
-                { text: 'Connection error with the server.', sender: 'ollama', isError: true, isStreaming: false, isComplete: false },
+                {
+                  text: "Connection error with the server.",
+                  sender: "ollama",
+                  isError: true,
+                  isStreaming: false,
+                  isComplete: false,
+                },
               ];
-              console.log('onerror setMessages: added new error message', newMessages);
+              console.log(
+                "onerror setMessages: added new error message",
+                newMessages
+              );
               return newMessages;
-
             }
-            console.log('onerror setMessages: Returning previous state (potential duplicate error message)');
+            console.log(
+              "onerror setMessages: Returning previous state (potential duplicate error message)"
+            );
             return prevMessages; // Return current state if duplicate error message already exists
           }
         });
@@ -165,21 +259,28 @@ export default function Chatbox({ className, active, streamId, setStreamId, send
       };
 
       eventSource.onclose = () => {
-        console.log('SSE connection closed successfully.');
-        console.log('Attempting to handle SSE close.');
+        console.log("SSE connection closed successfully.");
+        console.log("Attempting to handle SSE close.");
         // When the stream finishes successfully, mark the message as complete and set isStreaming to false
         setMessages((prevMessages) => {
-          const streamingOllamaIndex = prevMessages.findIndex(msg => msg.sender === 'ollama' && msg.isStreaming);
+          const streamingOllamaIndex = prevMessages.findIndex(
+            (msg) => msg.sender === "ollama" && msg.isStreaming
+          );
           const newMessages = [...prevMessages];
-          if(streamingOllamaIndex !== -1) {
+          if (streamingOllamaIndex !== -1) {
             newMessages[streamingOllamaIndex] = {
               ...newMessages[streamingOllamaIndex],
               isStreaming: false,
-              isComplete: true // Mark as complete
+              isComplete: true, // Mark as complete
             };
-            console.log('onclose setMessages: Marked streaming message as complete.', newMessages[streamingOllamaIndex]);
+            console.log(
+              "onclose setMessages: Marked streaming message as complete.",
+              newMessages[streamingOllamaIndex]
+            );
           } else {
-            console.warn("onclose setMessages: SSE close event fired, but no actively streaming message found to mark as complete.");
+            console.warn(
+              "onclose setMessages: SSE close event fired, but no actively streaming message found to mark as complete."
+            );
           }
           return newMessages;
         });
@@ -187,7 +288,7 @@ export default function Chatbox({ className, active, streamId, setStreamId, send
       };
 
       return () => {
-        console.log('Cleaning up EventSource.');
+        console.log("Cleaning up EventSource.");
         if (eventSourceRef.current) {
           eventSourceRef.current.close();
           eventSourceRef.current = null; // Clear the ref on cleanup
@@ -196,7 +297,7 @@ export default function Chatbox({ className, active, streamId, setStreamId, send
     } else {
       // Cleanup if streamId becomes null while an event source is active
       if (eventSourceRef.current) {
-        console.log('streamId became null, cleaning up active EventSource.');
+        console.log("streamId became null, cleaning up active EventSource.");
         eventSourceRef.current.close();
         eventSourceRef.current = null;
       }
@@ -229,7 +330,7 @@ export default function Chatbox({ className, active, streamId, setStreamId, send
     );
   };
 
-  const displayAIMessage =  (data: string) => {
+  const displayAIMessage = (data: string) => {
     const text = marked(data);
     return (
       <div className="flex gap-3 my-4 text-gray-600 text-sm flex-1">
@@ -283,7 +384,7 @@ export default function Chatbox({ className, active, streamId, setStreamId, send
           Powered by ThinkLink Gemma-2-2B-IT
         </p>
       </div>
-      <div className="chatBody pr-4 h-[474px] min-w-1/1 flex flex-col overflow-scroll break-words">
+      <div className="chatBody pr-4 h-[474px] min-w-1/1 flex flex-col overflow-auto break-words">
         {messages}
         <div
           ref={(element) => {
@@ -294,12 +395,19 @@ export default function Chatbox({ className, active, streamId, setStreamId, send
       <form onSubmit={handleFormSubmission}>
         <div className="flex items-center pt-0">
           <input
+            ref={inputBox}
             className="mr-2 flex h-10 w-full rounded-md border border-[#e5e7eb] px-3 py-2 text-sm placeholder-[#6b7280] focus:outline-none focus:ring-2 focus:ring-[#9ca3af] disabled:cursor-not-allowed disabled:opacity-50 text-[#030712] focus-visible:ring-offset-2"
             placeholder="Type your message"
-            defaultValue=""
+            value={messageText}
             name="message"
+            onChange={(event) => {
+              setMessageText(event.target.value);
+            }}
           />
-          <button type="submit" className="cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium text-[#f9fafb] disabled:pointer-events-none disabled:opacity-50 bg-black hover:bg-[#111827E6] h-10 px-4 py-2">
+          <button
+            type="submit"
+            className="cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium text-[#f9fafb] disabled:pointer-events-none disabled:opacity-50 bg-black hover:bg-[#111827E6] h-10 px-4 py-2"
+          >
             Send
           </button>
         </div>

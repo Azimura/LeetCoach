@@ -31,7 +31,7 @@ export default function ProblemText({
       ); // `...` => <span>...<span>
   };
   return (
-    <div className="py-5 px-4 flex gap-4 flex-col overflow-y-scroll h-full">
+    <div className="py-5 px-4 flex gap-4 flex-col overflow-auto h-full">
       <div className="title">
         <h1 className="text-[24px] font-semibold leading-[32px] text-black">
           {problemID}. {title}

@@ -6,13 +6,9 @@ import { useEffect, useRef, useState } from "react";
 interface CodeEditorProps {
   initialCode: string;
   setCode: Function;
-
 }
 
-const CodeEditor = ({
-  initialCode,
-  setCode,
-}: CodeEditorProps) => {
+const CodeEditor = ({ initialCode, setCode }: CodeEditorProps) => {
   let code = initialCode;
   const editorRef = useRef<editor.IStandaloneCodeEditor>(null);
   const onEditorMount = (
@@ -36,27 +32,27 @@ const CodeEditor = ({
     ]);*/
   };
   return (
-            <Editor
-                height={"100%"}
-                language="python"
-                value={code}
-                options={{
-                    fontSize: 14,
-                    minimap: {
-                        enabled: false,
-                    },
+    <Editor
+      height={"100%"}
+      language="python"
+      value={code}
+      options={{
+        fontSize: 14,
+        minimap: {
+          enabled: false,
+        },
 
-                    autoClosingBrackets: "languageDefined",
-                    lineNumbers: "on",
-                }}
-                onChange={(value) => {
-                    if (value) {
-                        setCode(value);
-                    }
-                }}
-                className="pt-5"
-                onMount={onEditorMount}
-            />
+        autoClosingBrackets: "languageDefined",
+        lineNumbers: "on",
+      }}
+      onChange={(value) => {
+        if (value) {
+          setCode(value);
+        }
+      }}
+      className="pt-5"
+      onMount={onEditorMount}
+    />
   );
 };
 

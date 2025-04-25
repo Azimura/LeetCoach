@@ -1,19 +1,20 @@
 "use client";
 import Image from "next/image";
 import Icon from "@/app/favicon.ico";
-import {useSearchParams} from "next/navigation";
-import {LoginUser} from "@/app/problem/[id]/api";
+import { useSearchParams } from "next/navigation";
+import { LoginUser } from "@/app/component/api";
 
 const formAction = async (formData: FormData) => {
   const id = formData.get("username");
-  if(id) {
+  if (id) {
     LoginUser(id.toString());
   }
 };
+
 export default function Login() {
   const searchParams = useSearchParams();
   const studentID = searchParams.get("id");
-
+  console.log(studentID != null);
   return (
     <form
       action={formAction}
@@ -29,7 +30,7 @@ export default function Login() {
           type="text"
           name="username"
           placeholder="Enter username"
-          value={studentID ? studentID : ""}
+          defaultValue={studentID ? studentID : ""}
           readOnly={studentID != null}
         />
       </div>
