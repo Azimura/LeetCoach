@@ -132,13 +132,17 @@ export async function Refine(userID: number, problemID: number, code: string) {
   return await response.json();
 }
 
-export async function Chat(message: string) {
+export async function Chat(message: string, userID: number, problemID: number) {
   const response = await fetch("http://10.152.70.67:4999/chat/message", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ query: message }), // Use the text from the userMessage object
+    body: JSON.stringify({
+      query: message,
+      user_id: userID,
+      problem_id: problemID,
+    }),
   });
   return await response.json();
 }

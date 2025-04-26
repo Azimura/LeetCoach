@@ -112,7 +112,9 @@ export default function Problem({
   };
 
   const SendMessage = async (message: string) => {
-    const data = await Chat(message);
+    const userID = Number(getCookie("userID"));
+    const { id } = await params;
+    const data = await Chat(message, userID, id);
     setStreamId(data.stream_id);
   };
 
