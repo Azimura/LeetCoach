@@ -1,6 +1,9 @@
 import multiprocessing
 import traceback
 
+LLM_GENERATE_URL = "http://localhost:11434/api/generate"
+REFINED_MODEL = "refined"
+
 def run_user_code(user_code, input_code, assert_code, return_dict):
     namespace = {}
     try:

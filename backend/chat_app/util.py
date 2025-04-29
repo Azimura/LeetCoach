@@ -1,9 +1,7 @@
-import threading
-
 LLM_CHAT_URL = "http://localhost:11434/api/chat"
-LLM_GENERATE_URL = "http://localhost:11434/api/generate"
+# LLM_GENERATE_URL = "http://localhost:11434/api/generate"
 CHAT_MODEL = "chat"
-REFINED_MODEL = "refined"
+# REFINED_MODEL = "refined"
 
 
 def build_prompt(context_list, history_blocks, user_query):
@@ -23,7 +21,7 @@ def build_prompt(context_list, history_blocks, user_query):
             role = "user" if role_str.lower() == "user" else "assistant"
             messages.append({
                 "role": role,
-                "content": content
+                "content": content[:200] if role=="user" else content,
             })
         else:
             print(f"Warning: Could not parse history block: {block}")

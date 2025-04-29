@@ -28,11 +28,11 @@ chat_app.register_blueprint(refine_bp)
 def initiate_chat(history_limit=10):
     global stream_counter
     data = request.get_json()
-    user_id = 1
-    problem_id = 26
+    user_id = data.get("user_id", 3)
+    problem_id = data.get("problem_id", 26)
     query = data.get("query", "").strip()
 
-    if not query:
+    if not all([user_id, problem_id, query]):
         return jsonify({
             "error": "Missing 'query' in request body",
             "result": 0
