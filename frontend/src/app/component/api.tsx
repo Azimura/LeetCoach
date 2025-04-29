@@ -117,7 +117,7 @@ export async function StartProgress(problemID: number, userID: number) {
 }
 
 export async function Refine(userID: number, problemID: number, code: string) {
-  const response = await fetch(`http://10.152.70.67:4999/chat/refine`, {
+  const response = await fetch(`http://10.152.70.67:5000/problem/refine`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
