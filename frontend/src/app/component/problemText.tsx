@@ -1,3 +1,5 @@
+import { marked } from "marked";
+
 interface ProblemTextProps {
   content: string;
   title: string;
@@ -14,6 +16,7 @@ export default function ProblemText({
   problemID,
 }: ProblemTextProps) {
   const ParseContent = (text: string) => {
+    console.log(text);
     text = "<p>" + text + "</p>";
     return text
       .trim()
@@ -41,7 +44,7 @@ export default function ProblemText({
         {difficulty}
       </div>
       <div
-        dangerouslySetInnerHTML={{ __html: ParseContent(content) }}
+        dangerouslySetInnerHTML={{ __html: marked(content) }}
         className="text-black gap-[1rem] text-[14px] flex flex-col"
       ></div>
     </div>

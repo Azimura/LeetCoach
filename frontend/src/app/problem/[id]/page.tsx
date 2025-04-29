@@ -22,7 +22,6 @@ import { faClockFour } from "@fortawesome/free-regular-svg-icons";
 import { Editor } from "@monaco-editor/react";
 import ErrorModal from "@/app/component/errorModal";
 import LoadingModal from "@/app/component/loadingModal";
-import { get } from "http";
 
 interface ProblemResponse {
   code_template: string;
@@ -48,7 +47,12 @@ export default function Problem({
   const [displayLoading, setDisplayLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
   const [error, setError] = useState("");
-  const [result, setResult] = useState({});
+  const [result, setResult] = useState({
+    error_message: {},
+    pass: 0,
+    submission_id: 0,
+    test_cases: 0,
+  });
   const [refinedCode, setRefinedCode] = useState("");
   const [streamId, setStreamId] = useState(-1);
   const [completed, setCompleted] = useState(false);
@@ -64,7 +68,7 @@ export default function Problem({
   const [timeUp, setTimeUp] = useState<boolean>(false);
   const [code, setCode] = useState("");
   const TestCode = async (code: string) => {
-    setResult({});
+    setResult({ error_message: {}, pass: 0, submission_id: 0, test_cases: 0 });
     setDisplayResult(true);
     const userID = Number(getCookie("userID"));
     const { id } = await params;
@@ -73,7 +77,7 @@ export default function Problem({
   };
 
   const SubmitCode = async (code: string) => {
-    setResult({});
+    setResult({ error_message: {}, pass: 0, submission_id: 0, test_cases: 0 });
     setDisplayResult(true);
     const userID = Number(getCookie("userID"));
     const { id } = await params;
@@ -163,12 +167,15 @@ export default function Problem({
     const userID = Number(getCookie("userID"));
     const { id } = await params;
     const response = await StartProgress(id, userID);
-    console.log(response);
+    const startTime = new Date(Number(response.start_time) * 1000);
+    console.log(startTime.getTime());
+    const currentTime = new Date();
+    const elapsedTime = (currentTime.getTime() - startTime.getTime()) / 1000;
+    setTime(elapsedTime > 600 ? 0 : Math.round(600 - elapsedTime));
   };
 
   const Skip = async () => {
     const { id } = await params;
-    console.log("skipping");
     SkipProblem(id);
   };
 
@@ -181,7 +188,12 @@ export default function Problem({
 
   useEffect(() => {
     if (!displayResult) {
-      setResult({});
+      setResult({
+        error_message: {},
+        pass: 0,
+        submission_id: 0,
+        test_cases: 0,
+      });
     }
   }, [displayResult]);
   const layout = [
@@ -224,7 +236,7 @@ export default function Problem({
               setDisplayChatbox(!displayChatbox);
             }}
           >
-            Ask LeetCoach!
+            {displayChatbox ? "Back to Code" : "Ask LeetCoach!"}
           </button>
         )}
       </div>
@@ -243,6 +255,7 @@ export default function Problem({
                 Skip();
               }}
               className="cursor-pointer self-end py-1.5 font-medium items-center whitespace-nowrap focus:outline-none inline-flex bg-fill-3 bg-[#2db55d] hover:bg-[#269a4f] h-[32px] select-none px-5 text-[12px] leading-[1.25rem] text-white text-sm rounded-lg ml-2"
+              title=""
             >
               Skip Problem
             </button>
@@ -268,38 +281,50 @@ export default function Problem({
           />
         </div>
         <div
-          className="bg-white p-0 m-0 flex flex-row flex-1"
+          className="bg-white p-0 m-0 flex flex-row flex-2"
           key={"Code Editor"}
         >
           <div className="h-full w-full flex flex-col justify-between">
-            <div className="flex justify-between px-5 py-5 shadow-lg">
-              <h1 className="font-bold text-2xl text-black"> Code Editor </h1>
-              <div>
-                <button
-                  onClick={() => {
-                    TestCode(code);
-                  }}
-                  className="text-black cursor-pointer self-end py-1.5 font-medium items-center whitespace-nowrap focus:outline-none inline-flex bg-fill-3 bg-[#000a200d] hover:bg-[#000a201a] h-[32px] select-none px-5 text-[12px] leading-[1.25rem] text-sm rounded-lg ml-2"
-                >
-                  Run
-                </button>
-                <button
-                  onClick={() => {
-                    RefineCode(code);
-                  }}
-                  className="text-black cursor-pointer self-end py-1.5 font-medium items-center whitespace-nowrap focus:outline-none inline-flex bg-fill-3 bg-[#000a200d] hover:bg-[#000a201a] h-[32px] select-none px-5 text-[12px] leading-[1.25rem] text-sm rounded-lg ml-2"
-                >
-                  Refine
-                </button>
-                <button
-                  onClick={() => {
-                    SubmitCode(code);
-                  }}
-                  className="cursor-pointer self-end py-1.5 font-medium items-center whitespace-nowrap focus:outline-none inline-flex bg-fill-3 bg-[#2db55d] hover:bg-[#269a4f] h-[32px] select-none px-5 text-[12px] leading-[1.25rem] text-white text-sm rounded-lg ml-2"
-                >
-                  Submit
-                </button>
+            <div className="flex flex-col px-5 py-5 shadow-lg">
+              <div className="flex justify-between border-b-2 pb-2 border-black">
+                <h1 className="font-bold text-2xl text-black"> Code Editor </h1>
+                <div>
+                  <button
+                    onClick={() => {
+                      TestCode(code);
+                    }}
+                    className="text-black cursor-pointer py-1.5 font-medium items-center whitespace-nowrap focus:outline-none inline-flex bg-fill-3 bg-[#2db55d] hover:bg-[#269a4f] h-[32px] select-none px-5 text-[12px] leading-[1.25rem] text-white text-sm rounded-lg ml-2"
+                    title="Troubleshoot code before you submit"
+                  >
+                    Test My Code
+                  </button>
+                  <button
+                    onClick={() => {
+                      RefineCode(code);
+                    }}
+                    className="text-black cursor-pointer py-1.5 font-medium items-center whitespace-nowrap focus:outline-none inline-flex bg-fill-3 bg-[#2db55d] hover:bg-[#269a4f] h-[32px] select-none px-5 text-[12px] leading-[1.25rem] text-white text-sm rounded-lg ml-2"
+                    title="Have LeetCoach fix your code"
+                  >
+                    Refine My Code
+                  </button>
+                  <button
+                    onClick={() => {
+                      SubmitCode(code);
+                    }}
+                    className="cursor-pointer self-end py-1.5 font-medium items-center whitespace-nowrap focus:outline-none inline-flex bg-fill-3 bg-[#000080] hover:bg-[#010157] h-[32px] select-none px-5 text-[12px] leading-[1.25rem] text-white text-sm rounded-lg ml-2"
+                    title="Done? Have LeetCoach evaluate your solution"
+                  >
+                    Submit Code
+                  </button>
+                </div>
               </div>
+              <h2 className="text-black mt-2 text-sm">
+                Write your solution here in pseudocode or any coding language.
+                <br />
+                Select “Test My Code” to run before submitting, or “Refine My
+                Code” to show the code in Python. When finished, click "Submit
+                Code."
+              </h2>
             </div>
             <div className="h-full flex flex-row overflow-hidden">
               {displayRefinedCode ? (
@@ -310,7 +335,6 @@ export default function Problem({
                     </h2>
                     <Editor
                       height={"100%"}
-                      language="python"
                       value={code}
                       options={{
                         fontSize: 14,
@@ -332,7 +356,7 @@ export default function Problem({
                   <div className="w-full border-l-1 p-2">
                     <div className="flex flex-row justify-between">
                       <h2 className="font-bold text-xl text-black">
-                        Refined Code:
+                        Refined Code (Python):
                       </h2>
                       <button
                         onClick={() => {

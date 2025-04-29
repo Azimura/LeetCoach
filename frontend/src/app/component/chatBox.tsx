@@ -30,7 +30,7 @@ export default function Chatbox({
   const [messageText, setMessageText] = useState<string>("");
   const [receivedMessages, setMessages] = useState<Array<Message>>([]);
   const messageTextIsEmpty = messageText.trim().length === 0;
-  const eventSourceRef = useRef(null);
+  var eventSourceRef: EventSource | null = null;
   const ollamaResponseRef = useRef("");
 
   const handleFormSubmission = (event: any) => {
@@ -55,7 +55,7 @@ export default function Chatbox({
       const eventSource = new EventSource(
         `http://10.152.70.67:4999/chat/stream/${streamId}`
       );
-      eventSourceRef.current = eventSource;
+      eventSourceRef = eventSource;
 
       eventSource.onmessage = (event) => {
         try {
@@ -258,48 +258,19 @@ export default function Chatbox({
         setStreamId(null);
       };
 
-      eventSource.onclose = () => {
-        console.log("SSE connection closed successfully.");
-        console.log("Attempting to handle SSE close.");
-        // When the stream finishes successfully, mark the message as complete and set isStreaming to false
-        setMessages((prevMessages) => {
-          const streamingOllamaIndex = prevMessages.findIndex(
-            (msg) => msg.sender === "ollama" && msg.isStreaming
-          );
-          const newMessages = [...prevMessages];
-          if (streamingOllamaIndex !== -1) {
-            newMessages[streamingOllamaIndex] = {
-              ...newMessages[streamingOllamaIndex],
-              isStreaming: false,
-              isComplete: true, // Mark as complete
-            };
-            console.log(
-              "onclose setMessages: Marked streaming message as complete.",
-              newMessages[streamingOllamaIndex]
-            );
-          } else {
-            console.warn(
-              "onclose setMessages: SSE close event fired, but no actively streaming message found to mark as complete."
-            );
-          }
-          return newMessages;
-        });
-        setStreamId(null);
-      };
-
       return () => {
         console.log("Cleaning up EventSource.");
-        if (eventSourceRef.current) {
-          eventSourceRef.current.close();
-          eventSourceRef.current = null; // Clear the ref on cleanup
+        if (eventSourceRef) {
+          eventSourceRef.close();
+          eventSourceRef = null; // Clear the ref on cleanup
         }
       };
     } else {
       // Cleanup if streamId becomes null while an event source is active
-      if (eventSourceRef.current) {
+      if (eventSourceRef) {
         console.log("streamId became null, cleaning up active EventSource.");
-        eventSourceRef.current.close();
-        eventSourceRef.current = null;
+        eventSourceRef.close();
+        eventSourceRef = null;
       }
     }
   }, [streamId, setMessages]); // Added setMessages to dependency array

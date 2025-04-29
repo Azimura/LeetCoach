@@ -34,7 +34,6 @@ const CodeEditor = ({ initialCode, setCode }: CodeEditorProps) => {
   return (
     <Editor
       height={"100%"}
-      language="python"
       value={code}
       options={{
         fontSize: 14,
