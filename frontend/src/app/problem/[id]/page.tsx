@@ -38,7 +38,6 @@ export default function Problem({
   params: Promise<{ id: number }>;
 }) {
   "use client";
-  console.log(Number(getCookie("userID")));
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
   const [displayChatbox, setDisplayChatbox] = useState(false);
   const [displayResult, setDisplayResult] = useState(false);
@@ -100,7 +99,6 @@ export default function Problem({
       const refinedCode = stripCodeFence(result.message);
       setRefinedCode(refinedCode);
       setDisplayRefinedCode(true);
-      console.log("ran");
     } else {
       setError(result.message);
       setDisplayError(true);
@@ -110,7 +108,6 @@ export default function Problem({
   const RetrieveProblem = async () => {
     const { id } = await params;
     const problem = await GetProblem(id);
-    console.log(problem);
     setProblem(problem);
     setCode(problem.code_template);
   };
@@ -168,7 +165,6 @@ export default function Problem({
     const { id } = await params;
     const response = await StartProgress(id, userID);
     const startTime = new Date(Number(response.start_time) * 1000);
-    console.log(startTime.getTime());
     const currentTime = new Date();
     const elapsedTime = (currentTime.getTime() - startTime.getTime()) / 1000;
     setTime(elapsedTime > 600 ? 0 : Math.round(600 - elapsedTime));
@@ -290,6 +286,15 @@ export default function Problem({
                 <h1 className="font-bold text-2xl text-black"> Code Editor </h1>
                 <div>
                   <button
+                      onClick={() => {
+                        RefineCode(code);
+                      }}
+                      className="text-black cursor-pointer py-1.5 font-medium items-center whitespace-nowrap focus:outline-none inline-flex bg-fill-3 bg-[#2db55d] hover:bg-[#269a4f] h-[32px] select-none px-5 text-[12px] leading-[1.25rem] text-white text-sm rounded-lg ml-2"
+                      title="Have LeetCoach fix your code"
+                  >
+                    Refine My Code
+                  </button>
+                  <button
                     onClick={() => {
                       TestCode(code);
                     }}
@@ -297,15 +302,6 @@ export default function Problem({
                     title="Troubleshoot code before you submit"
                   >
                     Test My Code
-                  </button>
-                  <button
-                    onClick={() => {
-                      RefineCode(code);
-                    }}
-                    className="text-black cursor-pointer py-1.5 font-medium items-center whitespace-nowrap focus:outline-none inline-flex bg-fill-3 bg-[#2db55d] hover:bg-[#269a4f] h-[32px] select-none px-5 text-[12px] leading-[1.25rem] text-white text-sm rounded-lg ml-2"
-                    title="Have LeetCoach fix your code"
-                  >
-                    Refine My Code
                   </button>
                   <button
                     onClick={() => {
@@ -318,13 +314,12 @@ export default function Problem({
                   </button>
                 </div>
               </div>
-              <h2 className="text-black mt-2 text-sm">
-                Write your solution here in pseudocode or any coding language.
-                <br />
-                Select “Test My Code” to run before submitting, or “Refine My
-                Code” to show the code in Python. When finished, click "Submit
-                Code."
-              </h2>
+                <pre className="text-sm pt-2">
+                Write your solution below in pseudocode or any coding language. <br />
+                <strong >Refine My Code</strong>: if your solution is not in Python - LeetCoach currently supports Python only. <br />
+                <strong >Test My Code</strong>: to run and validate your solution before submitting. <br />
+                <strong>Submit Code</strong>: when you're ready to finalize your submission. <br />
+                </pre>
             </div>
             <div className="h-full flex flex-row overflow-hidden">
               {displayRefinedCode ? (
@@ -335,6 +330,7 @@ export default function Problem({
                     </h2>
                     <Editor
                       height={"100%"}
+                      language={"python"}
                       value={code}
                       options={{
                         fontSize: 14,

@@ -75,7 +75,7 @@ export default function Chatbox({
   }, []); // Empty dependency array ensures this runs only once on mount
 
   useEffect(() => {
-    if (streamId) {
+    if (streamId > 0) {
       let isStreaming = true;
 
       const fetchStream = async () => {
