@@ -29,8 +29,8 @@ export default function Chatbox({
 
   const [messageText, setMessageText] = useState<string>("");
   const [receivedMessages, setMessages] = useState<Array<Message>>([]);
-  const messageTextIsEmpty = messageText.trim().length === 0;
-  var eventSourceRef: EventSource | null = null;
+  // const messageTextIsEmpty = messageText.trim().length === 0;
+  // var eventSourceRef: EventSource | null = null;
   const ollamaResponseRef = useRef("");
 
   const handleFormSubmission = (event: any) => {
@@ -51,233 +51,251 @@ export default function Chatbox({
   };
 
   useEffect(() => {
+    // Only add the initial message if the messages array is empty
+    setMessages((prevMessages) => {
+      if (prevMessages.length === 0) {
+        return [
+          {
+            text: "How can I assist you? For example, you can ask me:\n" +
+                "\n" +
+                "• Help me to break down the solution into smaller steps\n" +
+                "\n" +
+                "• Tell me what data structures I should use\n" +
+                "\n" +
+                "• Give me a suggestion to make my code efficient based on the constraints",
+            sender: 'LeetCoach',
+            isStreaming: false,
+            isError: false,
+            isComplete: true,
+          },
+        ];
+      }
+      return prevMessages; // If messages already exist, don't modify
+    });
+  }, []); // Empty dependency array ensures this runs only once on mount
+
+  useEffect(() => {
     if (streamId) {
-      const eventSource = new EventSource(
-        `http://10.152.70.67:4999/chat/stream/${streamId}`
-      );
-      eventSourceRef = eventSource;
+      let isStreaming = true;
 
-      eventSource.onmessage = (event) => {
+      const fetchStream = async () => {
         try {
-          const data = JSON.parse(event.data);
-          console.log("SSE message received:", data); // Log all incoming SSE data
+          const response = await fetch(
+              `https://internal-squid-sensibly.ngrok-free.app/chat/stream/${streamId}`,
+              {
+                method: 'GET',
+                headers: {
+                  'ngrok-skip-browser-warning': 'any-value',
+                  'User-Agent': 'CustomClient/1.0',
+                },
+              }
+          );
 
-          // Explicitly check for the completion signal from the backend (empty object)
-          if (Object.keys(data).length === 0) {
-            console.log("Received completion signal from server (empty data).");
-            // The onclose handler should handle the final state update and cleanup
-            return; // Stop processing in onmessage for the completion signal
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
           }
 
-          if (data.chunk) {
-            ollamaResponseRef.current += data.chunk;
-            setMessages((prevMessages) => {
-              // Find the index of the message currently being streamed using the isStreaming flag
-              const streamingOllamaIndex = prevMessages.findIndex(
-                (msg) => msg.sender === "ollama" && msg.isStreaming
-              );
+          // @ts-ignore
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
 
-              if (streamingOllamaIndex !== -1) {
-                // Update the text of the streaming message
-                const newMessages = [...prevMessages];
-                newMessages[streamingOllamaIndex] = {
-                  ...newMessages[streamingOllamaIndex],
-                  text: ollamaResponseRef.current,
-                };
-                return newMessages;
-              } else {
-                // This case should ideally not happen if the placeholder is added correctly in handleSubmit,
-                // but as a fallback, add a new message if somehow missed.
-                console.warn(
-                  "onmessage setMessages: Streaming message placeholder not found during chunk update. Adding a new message."
+          while (isStreaming) {
+            const { done, value } = await reader.read();
+            if (done) {
+              console.log('Stream completed');
+              setMessages((prevMessages) => {
+                const streamingIndex = prevMessages.findIndex(
+                    (msg) => msg.sender === 'LeetCoach' && msg.isStreaming
                 );
-                return [
-                  ...prevMessages,
-                  {
-                    text: ollamaResponseRef.current,
-                    sender: "ollama",
-                    isStreaming: true,
-                    isError: false,
-                    isComplete: false,
-                  },
-                ]; // Ensure all flags are set
+                if (streamingIndex !== -1) {
+                  const newMessages = [...prevMessages];
+                  newMessages[streamingIndex] = {
+                    ...newMessages[streamingIndex],
+                    isStreaming: false,
+                    isComplete: true,
+                  };
+                  return newMessages;
+                }
+                return prevMessages;
+              });
+              break;
+            }
+
+            const chunk = decoder.decode(value, { stream: true });
+            const lines = chunk.split('\n\n');
+
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                const data = line.slice(6);
+                try {
+                  const parsedData = JSON.parse(data);
+                  console.log('SSE message received:', parsedData);
+
+                  // Handle completion signal
+                  if (Object.keys(parsedData).length === 0) {
+                    console.log('Received completion signal from server (empty data).');
+                    setMessages((prevMessages) => {
+                      const streamingIndex = prevMessages.findIndex(
+                          (msg) => msg.sender === 'LeetCoach' && msg.isStreaming
+                      );
+                      if (streamingIndex !== -1) {
+                        const newMessages = [...prevMessages];
+                        newMessages[streamingIndex] = {
+                          ...newMessages[streamingIndex],
+                          isStreaming: false,
+                          isComplete: true,
+                        };
+                        return newMessages;
+                      }
+                      return prevMessages;
+                    });
+                    return;
+                  }
+
+                  // Handle incoming chunk
+                  if (parsedData.chunk) {
+                    ollamaResponseRef.current += parsedData.chunk;
+                    setMessages((prevMessages) => {
+                      const streamingIndex = prevMessages.findIndex(
+                          (msg) => msg.sender === 'LeetCoach' && msg.isStreaming
+                      );
+
+                      if (streamingIndex !== -1) {
+                        const newMessages = [...prevMessages];
+                        newMessages[streamingIndex] = {
+                          ...newMessages[streamingIndex],
+                          text: ollamaResponseRef.current,
+                        };
+                        return newMessages;
+                      } else {
+                        console.log('Adding new streaming message');
+                        return [
+                          ...prevMessages,
+                          {
+                            text: ollamaResponseRef.current,
+                            sender: 'LeetCoach',
+                            isStreaming: true,
+                            isError: false,
+                            isComplete: false,
+                          },
+                        ];
+                      }
+                    });
+                  } else if (parsedData.error) {
+                    console.error('Stream reported an error:', parsedData.error);
+                    setMessages((prevMessages) => {
+                      const streamingIndex = prevMessages.findIndex(
+                          (msg) => msg.sender === 'LeetCoach' && msg.isStreaming
+                      );
+                      if (streamingIndex !== -1) {
+                        const newMessages = [...prevMessages];
+                        newMessages[streamingIndex] = {
+                          ...newMessages[streamingIndex],
+                          text: `Error: ${parsedData.error}`,
+                          isError: true,
+                          isStreaming: false,
+                          isComplete: false,
+                        };
+                        return newMessages;
+                      }
+                      return [
+                        ...prevMessages,
+                        {
+                          text: `Error: ${parsedData.error}`,
+                          sender: 'LeetCoach',
+                          isError: true,
+                          isStreaming: false,
+                          isComplete: false,
+                        },
+                      ];
+                    });
+                    return;
+                  }
+                } catch (error) {
+                  console.error('Error parsing SSE event:', error, data);
+                  setMessages((prevMessages) => {
+                    const streamingIndex = prevMessages.findIndex(
+                        (msg) => msg.sender === 'LeetCoach' && msg.isStreaming
+                    );
+                    if (streamingIndex !== -1) {
+                      const newMessages = [...prevMessages];
+                      newMessages[streamingIndex] = {
+                        ...newMessages[streamingIndex],
+                        text: 'Error processing response from server.',
+                        isError: true,
+                        isStreaming: false,
+                        isComplete: false,
+                      };
+                      return newMessages;
+                    }
+                    return [
+                      ...prevMessages,
+                      {
+                        text: 'Error processing response from server.',
+                        sender: 'LeetCoach',
+                        isError: true,
+                        isStreaming: false,
+                        isComplete: false,
+                      },
+                    ];
+                  });
+                  return;
+                }
               }
-            });
-          } else if (data.error) {
-            // Handle stream-specific errors by updating the streaming message to an error state
-            console.error("Stream reported an error:", data.error);
-            setMessages((prevMessages) => {
-              const streamingOllamaIndex = prevMessages.findIndex(
-                (msg) => msg.sender === "ollama" && msg.isStreaming
-              );
-              if (streamingOllamaIndex !== -1) {
-                const newMessages = [...prevMessages];
-                newMessages[streamingOllamaIndex] = {
-                  ...newMessages[streamingOllamaIndex],
-                  text: `Error in stream: ${data.error}`,
-                  sender: "ollama",
-                  isError: true,
-                  isStreaming: false,
-                  isComplete: false,
-                };
-                return newMessages;
-              }
-              // Fallback
-              console.error(
-                "onmessage error setMessages: Error message received but no streaming message found to update."
-              );
-              return [
-                ...prevMessages,
-                {
-                  text: `Error in stream: ${data.error}`,
-                  sender: "ollama",
-                  isError: true,
-                  isStreaming: false,
-                  isComplete: false,
-                },
-              ];
-            });
-            eventSource.close();
-            setStreamId(null);
+            }
           }
         } catch (error) {
-          console.error("Error parsing SSE event:", error, event.data);
+          console.error('Fetch SSE error:', error);
           setMessages((prevMessages) => {
-            const streamingOllamaIndex = prevMessages.findIndex(
-              (msg) => msg.sender === "ollama" && msg.isStreaming
+            const streamingIndex = prevMessages.findIndex(
+                (msg) => msg.sender === 'LeetCoach' && msg.isStreaming
             );
-            if (streamingOllamaIndex !== -1) {
+            if (streamingIndex !== -1) {
               const newMessages = [...prevMessages];
-              newMessages[streamingOllamaIndex] = {
-                ...newMessages[streamingOllamaIndex],
-                text: "Error processing response from server.",
-                sender: "ollama",
+              newMessages[streamingIndex] = {
+                ...newMessages[streamingIndex],
+                text: 'Connection error with the server.',
                 isError: true,
                 isStreaming: false,
                 isComplete: false,
               };
               return newMessages;
             }
-            console.error(
-              "onmessage parse error setMessages: Parsing error but no streaming message found to update."
-            );
             return [
               ...prevMessages,
               {
-                text: "Error processing response from server.",
-                sender: "ollama",
+                text: 'Connection error with the server.',
+                sender: 'LeetCoach',
                 isError: true,
                 isStreaming: false,
                 isComplete: false,
               },
             ];
           });
-          eventSource.close();
+        } finally {
           setStreamId(null);
         }
       };
 
-      eventSource.onerror = (error) => {
-        console.error("SSE error event triggered:", error);
-        console.log("Attempting to handle SSE error.");
-        // This handler is for connection-level errors.
-        // Update the streaming message to a connection error state, BUT check if it was already completed.
-        setMessages((prevMessages) => {
-          const streamingOllamaIndex = prevMessages.findIndex(
-            (msg) => msg.sender === "ollama" && msg.isStreaming
-          );
-          let newMessages = [...prevMessages];
-
-          if (streamingOllamaIndex !== -1) {
-            // Found the message that was streaming
-            // Check if this message has already been marked as complete by onclose
-            if (newMessages[streamingOllamaIndex].isComplete) {
-              console.log(
-                "onerror: Stream already marked as complete by onclose, ignoring error for this message."
-              );
-              // If already complete, do nothing to this message's error state
-              return prevMessages; // Return previous state as no change needed for this message
-            } else {
-              // If not complete, mark it as an error
-              console.log(
-                "onerror: Stream not complete, marking message as error."
-              );
-              newMessages[streamingOllamaIndex] = {
-                ...newMessages[streamingOllamaIndex],
-                text:
-                  newMessages[streamingOllamaIndex].text ||
-                  "Connection error with the server.", // Keep existing text if any, otherwise set default error
-                isError: true,
-                isStreaming: false, // No longer streaming
-                isComplete: false, // Ensure isComplete is false in case of error
-              };
-              console.log(
-                "onerror setMessages: updated newMessages (error)",
-                newMessages
-              );
-              return newMessages;
-            }
-          } else {
-            // If no streaming message is found with isStreaming: true, this might be a general connection error not tied to a specific active stream.
-            console.warn(
-              "onerror setMessages: No actively streaming message found to update. Adding a new error message."
-            );
-            // Add a new error message at the bottom, but avoid duplicates for clarity
-            if (
-              !prevMessages.some(
-                (msg) =>
-                  msg.text === "Connection error with the server." &&
-                  msg.isError &&
-                  !msg.isStreaming &&
-                  !msg.isComplete
-              )
-            ) {
-              newMessages = [
-                ...prevMessages,
-                {
-                  text: "Connection error with the server.",
-                  sender: "ollama",
-                  isError: true,
-                  isStreaming: false,
-                  isComplete: false,
-                },
-              ];
-              console.log(
-                "onerror setMessages: added new error message",
-                newMessages
-              );
-              return newMessages;
-            }
-            console.log(
-              "onerror setMessages: Returning previous state (potential duplicate error message)"
-            );
-            return prevMessages; // Return current state if duplicate error message already exists
-          }
-        });
-        eventSource.close();
-        setStreamId(null);
-      };
+      fetchStream();
 
       return () => {
-        console.log("Cleaning up EventSource.");
-        if (eventSourceRef) {
-          eventSourceRef.close();
-          eventSourceRef = null; // Clear the ref on cleanup
-        }
+        console.log('Cleaning up fetch stream.');
+        isStreaming = false;
       };
     } else {
-      // Cleanup if streamId becomes null while an event source is active
-      if (eventSourceRef) {
-        console.log("streamId became null, cleaning up active EventSource.");
-        eventSourceRef.close();
-        eventSourceRef = null;
-      }
+      console.log('streamId became null, no cleanup needed.');
     }
-  }, [streamId, setMessages]); // Added setMessages to dependency array
+  }, [streamId, setMessages]);
+
   const displayUserMessage = (data: string) => {
     const text = marked(data);
     return (
-      <div className="flex gap-3 my-4 text-gray-600 text-sm flex-1 self-end">
+      <div className="flex gap-3 my-4 text-gray-600 text-sm flex-1 self-end"
+           style={{
+             maxWidth: '66.67%', // Limits user message to 2/3 of the container width
+             wordBreak: 'break-word', // Ensures long words wrap
+           }}>
         <p className="leading-relaxed">
           <span className="block font-bold text-gray-700">You </span>
           <div dangerouslySetInnerHTML={{ __html: text }} />
@@ -304,7 +322,10 @@ export default function Chatbox({
   const displayAIMessage = (data: string) => {
     const text = marked(data);
     return (
-      <div className="flex gap-3 my-4 text-gray-600 text-sm flex-1">
+      <div className="flex gap-3 my-4 text-gray-600 text-sm flex-1" style={{
+        maxWidth: '90%', // Limits  message to 80% of the container width
+        wordBreak: 'break-word', // Ensures long words wrap
+      }}>
         <span className="relative flex shrink-0 overflow-hidden rounded-full w-8 h-8">
           <div className="rounded-full bg-gray-100 border p-1">
             <svg
@@ -351,9 +372,6 @@ export default function Chatbox({
         <h2 className="font-semibold text-lg tracking-tight text-black">
           LeetCoach
         </h2>
-        <p className="text-sm text-[#6b7280] leading-3">
-          Powered by ThinkLink Gemma-2-2B-IT
-        </p>
       </div>
       <div className="chatBody pr-4 h-[474px] min-w-1/1 flex flex-col overflow-auto break-words">
         {messages}

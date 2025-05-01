@@ -133,7 +133,7 @@ export async function Refine(userID: number, problemID: number, code: string) {
 }
 
 export async function Chat(message: string, userID: number, problemID: number) {
-  const response = await fetch("http://10.152.70.67:4999/chat/message", {
+  const response = await fetch("https://internal-squid-sensibly.ngrok-free.app/chat/message", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
