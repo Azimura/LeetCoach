@@ -1,3 +1,5 @@
+from datetime import timezone
+
 from flask import Blueprint, request, jsonify
 from models import db
 from models.models import User, Problem, UserProgress
@@ -27,5 +29,5 @@ def create_progress():
 
     return jsonify({
         "message": "Progress created",
-        "start_time": int(progress.start_time.timestamp())
+        "start_time": int(progress.start_time.replace(tzinfo=timezone.utc).timestamp())
     })

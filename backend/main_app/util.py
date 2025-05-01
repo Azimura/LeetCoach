@@ -14,6 +14,8 @@ def run_user_code(user_code, input_code, assert_code, return_dict):
     except AssertionError as ae:
         return_dict['result'] = 0
         return_dict['error'] = str(ae)
+        if len(input_code) > 100:
+            input_code = input_code[:200] + "..."
         return_dict['input'] = input_code
     except Exception as e:
         tb = traceback.extract_tb(e.__traceback__)

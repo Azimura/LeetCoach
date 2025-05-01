@@ -5,7 +5,7 @@ import requests
 from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 
-from chat_app.refine import refine_bp
+# from chat_app.refine import refine_bp
 from chat_app.util import build_prompt, CHAT_MODEL, LLM_CHAT_URL
 from models import init_db, db
 from config import Config
@@ -21,7 +21,7 @@ ongoing_streams = {}
 stream_counter = 0
 streams_lock = threading.Lock()
 
-chat_app.register_blueprint(refine_bp)
+# chat_app.register_blueprint(refine_bp)
 
 
 @chat_app.route('/chat/message', methods=['POST'])

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from . import db
 
@@ -41,7 +41,7 @@ class Submission(db.Model):
     submission_type = db.Column(db.String(10), nullable=False)  # test/submit
     test_passed = db.Column(db.Integer, nullable=False)
     test_total = db.Column(db.Integer, nullable=False)
-    submission_time = db.Column(db.DateTime, default=db.func.now(), nullable=False)
+    submission_time = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 
     user = db.relationship('User', backref=db.backref('submissions', lazy=True))
     problem = db.relationship('Problem', backref=db.backref('submissions', lazy=True))
@@ -51,7 +51,7 @@ class UserProgress(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     problem_id = db.Column(db.Integer, db.ForeignKey('problem.id'), nullable=False)
-    start_time = db.Column(db.DateTime, default=db.func.now(), nullable=False)
+    start_time = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 
     user = db.relationship('User', backref=db.backref('progress', lazy=True))
     problem = db.relationship('Problem', backref=db.backref('progress', lazy=True))
@@ -78,7 +78,7 @@ class Refine(db.Model):
     answer = db.Column(db.Text, nullable=False)
     result = db.Column(db.Integer, nullable=False)
 
-    refine_time = db.Column(db.DateTime, default=db.func.now(), nullable=False)
+    refine_time = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     __table_args__ = (
         db.Index('ix_refine_user_problem', 'user_id', 'problem_id'),
     )
@@ -92,7 +92,7 @@ class Message(db.Model):
     problem_id = db.Column(db.Integer, nullable=False)
     role = db.Column(db.String(10), nullable=False)  # 'user' or 'system'
     content = db.Column(db.Text, nullable=False)
-    ctime = db.Column(db.DateTime, default=db.func.now(), nullable=False)
+    ctime = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 
     __table_args__ = (
         db.Index('ix_message_user_problem', 'user_id', 'problem_id'),
