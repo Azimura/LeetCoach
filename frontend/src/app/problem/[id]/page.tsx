@@ -52,6 +52,7 @@ export default function Problem({
     submission_id: 0,
     test_cases: 0,
   });
+  const [problemID, setProblemID] = useState(0);
   const [refinedCode, setRefinedCode] = useState("");
   const [streamId, setStreamId] = useState(-1);
   const [completed, setCompleted] = useState(false);
@@ -109,6 +110,7 @@ export default function Problem({
     const { id } = await params;
     const problem = await GetProblem(id);
     setProblem(problem);
+    setProblemID(Number(id));
     setCode(problem.code_template);
   };
 
@@ -224,17 +226,18 @@ export default function Problem({
         closeable={false}
       />
       <div className="tooltip-container absolute bottom-[2rem] right-[3rem] z-10">
-        {Number(getCookie("userID")) % 2 != 0 && (
-          <button
-            aria-describedby="help-tooltip"
-            className="help-button bg-[#4346f0] text-white border-none p-[12px 24px] text-white border-none rounded-[8px] py-[12px] px-[24px] cursor-pointer text-[16px] font-semibold shadow-[0 6px 12px rgba(0, 0, 0, 0.15)] hover:transform-[translateY(-2px)] hover:shadow-[0 6px 12px rgba(0, 0, 0, 0.15)]"
-            onClick={() => {
-              setDisplayChatbox(!displayChatbox);
-            }}
-          >
-            {displayChatbox ? "Back to Code" : "Ask LeetCoach!"}
-          </button>
-        )}
+        {Number(getCookie("userID")) % 2 != 0 ||
+          (problemID == 88 && (
+            <button
+              aria-describedby="help-tooltip"
+              className="help-button bg-[#4346f0] text-white border-none p-[12px 24px] text-white border-none rounded-[8px] py-[12px] px-[24px] cursor-pointer text-[16px] font-semibold shadow-[0 6px 12px rgba(0, 0, 0, 0.15)] hover:transform-[translateY(-2px)] hover:shadow-[0 6px 12px rgba(0, 0, 0, 0.15)]"
+              onClick={() => {
+                setDisplayChatbox(!displayChatbox);
+              }}
+            >
+              {displayChatbox ? "Back to Code" : "Ask LeetCoach!"}
+            </button>
+          ))}
       </div>
       <Chatbox
         active={displayChatbox}
@@ -286,11 +289,11 @@ export default function Problem({
                 <h1 className="font-bold text-2xl text-black"> Code Editor </h1>
                 <div>
                   <button
-                      onClick={() => {
-                        RefineCode(code);
-                      }}
-                      className="text-black cursor-pointer py-1.5 font-medium items-center whitespace-nowrap focus:outline-none inline-flex bg-fill-3 bg-[#2db55d] hover:bg-[#269a4f] h-[32px] select-none px-5 text-[12px] leading-[1.25rem] text-white text-sm rounded-lg ml-2"
-                      title="Have LeetCoach fix your code"
+                    onClick={() => {
+                      RefineCode(code);
+                    }}
+                    className="text-black cursor-pointer py-1.5 font-medium items-center whitespace-nowrap focus:outline-none inline-flex bg-fill-3 bg-[#2db55d] hover:bg-[#269a4f] h-[32px] select-none px-5 text-[12px] leading-[1.25rem] text-white text-sm rounded-lg ml-2"
+                    title="Have LeetCoach fix your code"
                   >
                     Refine My Code
                   </button>
@@ -314,12 +317,16 @@ export default function Problem({
                   </button>
                 </div>
               </div>
-                <pre className="text-sm pt-2">
-                Write your solution below in pseudocode or any coding language. <br />
-                <strong >Refine My Code</strong>: if your solution is not in Python - LeetCoach currently supports Python only. <br />
-                <strong >Test My Code</strong>: to run and validate your solution before submitting. <br />
-                <strong>Submit Code</strong>: when you're ready to finalize your submission. <br />
-                </pre>
+              <pre className="text-sm pt-2">
+                Write your solution below in pseudocode or any coding language.{" "}
+                <br />
+                <strong>Refine My Code</strong>: if your solution is not in
+                Python - LeetCoach currently supports Python only. <br />
+                <strong>Test My Code</strong>: to run and validate your solution
+                before submitting. <br />
+                <strong>Submit Code</strong>: when you're ready to finalize your
+                submission. <br />
+              </pre>
             </div>
             <div className="h-full flex flex-row overflow-hidden">
               {displayRefinedCode ? (
