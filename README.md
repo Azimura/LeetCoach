@@ -23,4 +23,4 @@ LeetCoach is made for:
 - React, TailwindCSS (Frontend)
 - FastAPI (Backend)
 - SQLLite (Database)
-- ThinkLink Gemma-2-2B-IT (LLM)
+- Ollama (LLM)
