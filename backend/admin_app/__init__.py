@@ -13,6 +13,10 @@ admin_app.config.from_object(Config)
 init_db(admin_app)
 admin = Admin(admin_app, name='Admin Panel', template_mode='bootstrap3')
 
+@admin_app.route('/')
+def index():
+    return 'WELCOME!'
+
 admin.add_view(UserAdmin(User, db.session))
 admin.add_view(ProblemAdmin(Problem, db.session))
 admin.add_view(TagAdmin(Tag, db.session))
