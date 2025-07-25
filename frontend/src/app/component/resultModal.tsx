@@ -136,7 +136,7 @@ export default function ResultModal({
                       onClose();
                     }}
                   />
-                  {Object.keys(result).length
+                  {Object.keys(result).length && result.test_cases != 0
                     ? DisplayResult()
                     : DisplayLoading()}
                 </DialogPanel>

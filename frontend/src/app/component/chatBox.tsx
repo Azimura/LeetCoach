@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { marked } from "marked";
+import { getCookie } from "cookies-next/client";
 
 interface Message {
   text: string;
@@ -56,13 +57,15 @@ export default function Chatbox({
       if (prevMessages.length === 0) {
         return [
           {
-            text: "How can I assist you? For example, you can ask me:\n" +
+            text: `Hello<strong> ${ getCookie('username') || ''}</strong>, how can I assist you? For example, you can ask me:\n` +
                 "\n" +
                 "• Help me to break down the solution into smaller steps\n" +
                 "\n" +
                 "• Tell me what data structures I should use\n" +
                 "\n" +
-                "• Give me a suggestion to make my code efficient based on the constraints",
+                "• Give me a suggestion to make my code efficient based on the constraints\n" +
+                "\n" +
+                "If you don't see my response, feel free to ask again — I'm here to support you!",
             sender: 'LeetCoach',
             isStreaming: false,
             isError: false,

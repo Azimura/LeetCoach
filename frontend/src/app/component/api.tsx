@@ -23,6 +23,7 @@ export async function MoveToNextProblem() {
   if (completedProblemsJSON) {
     completedProblem = JSON.parse(completedProblemsJSON.value);
   }
+
   if (!completedProblem.includes("26")) {
     return redirect("/problem/26");
   } else if (!completedProblem.includes("88")) {
@@ -30,12 +31,18 @@ export async function MoveToNextProblem() {
   } else if (!completedProblem.includes("129")) {
     return redirect("/problem/129");
   } else {
-    //TODO: redirect to exit survey
+    // Get username from cookies and add to survey URL
+    const usernameCookie = cookieStore.get("username");
+    const username = usernameCookie?.value || '';
+    const surveyUrl = username
+        ? `https://udayton.iad1.qualtrics.com/jfe/form/SV_erC64aogfWSCfzg?username=${encodeURIComponent(username)}`
+        : "https://udayton.iad1.qualtrics.com/jfe/form/SV_erC64aogfWSCfzg";
+    return redirect(surveyUrl);
   }
 }
 
 export async function LoginUser(id: string) {
-  const response = await fetch("http://10.152.70.67:5000/user", {
+  const response = await fetch("http://10.152.70.137:5000/user", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -55,7 +62,7 @@ export async function LoginUser(id: string) {
 }
 export async function GetProblem(problemID: number) {
   const response = await fetch(
-    `http://10.152.70.67:5000/problem/${problemID}`,
+    `http://10.152.70.137:5000/problem/${problemID}`,
     {
       method: "GET",
     }
@@ -64,7 +71,7 @@ export async function GetProblem(problemID: number) {
 }
 
 export async function Test(problemID: number, userID: number, code: string) {
-  const response = await fetch(`http://10.152.70.67:5000/problem/test`, {
+  const response = await fetch(`http://10.152.70.137:5000/problem/test`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -80,7 +87,7 @@ export async function Test(problemID: number, userID: number, code: string) {
 }
 
 export async function Submit(problemID: number, userID: number, code: string) {
-  const response = await fetch(`http://10.152.70.67:5000/problem/submit`, {
+  const response = await fetch(`http://10.152.70.137:5000/problem/submit`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -103,7 +110,7 @@ export async function Submit(problemID: number, userID: number, code: string) {
 }
 
 export async function StartProgress(problemID: number, userID: number) {
-  const response = await fetch(`http://10.152.70.67:5000/progress`, {
+  const response = await fetch(`http://10.152.70.137:5000/progress`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -117,7 +124,7 @@ export async function StartProgress(problemID: number, userID: number) {
 }
 
 export async function Refine(userID: number, problemID: number, code: string) {
-  const response = await fetch(`http://10.152.70.67:5000/problem/refine`, {
+  const response = await fetch(`http://10.152.70.137:5000/problem/refine`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -132,7 +139,7 @@ export async function Refine(userID: number, problemID: number, code: string) {
   return await response.json();
 }
 
-export async function Chat(message: string, userID: number, problemID: number) {
+export async function Chat(message: string, userID: number, problemID: number, code: string) {
   const response = await fetch("https://internal-squid-sensibly.ngrok-free.app/chat/message", {
     method: "POST",
     headers: {
@@ -142,6 +149,7 @@ export async function Chat(message: string, userID: number, problemID: number) {
       query: message,
       user_id: userID,
       problem_id: problemID,
+      user_code: code,
     }),
   });
   return await response.json();

@@ -117,7 +117,7 @@ export default function Problem({
   const SendMessage = async (message: string) => {
     const userID = Number(getCookie("userID"));
     const { id } = await params;
-    const data = await Chat(message, userID, id);
+    const data = await Chat(message, userID, id, code);
     setStreamId(data.stream_id);
   };
 
@@ -162,6 +162,13 @@ export default function Problem({
     };
   }, []);
 
+  const [username, setUsername] = useState('');
+
+  useEffect(() => {
+    const user = getCookie('username');
+    setUsername(user || '');
+  }, []);
+
   const BeginProgress = async () => {
     const userID = Number(getCookie("userID"));
     const { id } = await params;
@@ -199,7 +206,7 @@ export default function Problem({
     { i: "Code Editor", x: 1, y: 0, w: 1, h: 2, static: true },
   ];
   return (
-    <div className="bg-gray-200 overflow-hidden w-full h-screen flex flex-col">
+    <div className="bg-gray-200 overflow-hidden w-full h-screen flex flex-col pb-5">
       <ResultModal
         visible={displayResult}
         onClose={() => {
@@ -226,8 +233,7 @@ export default function Problem({
         closeable={false}
       />
       <div className="tooltip-container absolute bottom-[2rem] right-[3rem] z-10">
-        {Number(getCookie("userID")) % 2 != 0 ||
-          (problemID == 88 && (
+        {problemID == 88 && (
             <button
               aria-describedby="help-tooltip"
               className="help-button bg-[#4346f0] text-white border-none p-[12px 24px] text-white border-none rounded-[8px] py-[12px] px-[24px] cursor-pointer text-[16px] font-semibold shadow-[0 6px 12px rgba(0, 0, 0, 0.15)] hover:transform-[translateY(-2px)] hover:shadow-[0 6px 12px rgba(0, 0, 0, 0.15)]"
@@ -237,7 +243,7 @@ export default function Problem({
             >
               {displayChatbox ? "Back to Code" : "Ask LeetCoach!"}
             </button>
-          ))}
+          )}
       </div>
       <Chatbox
         active={displayChatbox}
@@ -266,7 +272,7 @@ export default function Problem({
           )}
         </div>
       </div>
-      <div className="flex flex-row h-full gap-5 p-5">
+      <div className="flex flex-row h-full gap-5 p-5 pb-10">
         <div
           className="bg-white p-0 m-0 flex-1 w-500 overflow-auto"
           key={"Problem Details"}
@@ -317,16 +323,30 @@ export default function Problem({
                   </button>
                 </div>
               </div>
-              <pre className="text-sm pt-2">
-                Write your solution below in pseudocode or any coding language.{" "}
+              <pre className="text-sm pt-2 text-gray-800 bg-gray-100 dark:text-gray-200 dark:bg-gray-800">
+      The platform accepts Python only.{" "}
                 <br />
-                <strong>Refine My Code</strong>: if your solution is not in
-                Python - LeetCoach currently supports Python only. <br />
-                <strong>Test My Code</strong>: to run and validate your solution
-                before submitting. <br />
-                <strong>Submit Code</strong>: when you're ready to finalize your
-                submission. <br />
-              </pre>
+      <br />
+      You can write your solution in pseudocode or any coding language,<br/>then run <strong>Refine My Code</strong> to convert it into Python and replace with your current code.
+                {problemID == 129 && (
+                    <>
+                      <br />
+                      <br />
+                      This is the final problem, after completing, please help us with{" "}
+                      <a
+                          href={username
+                              ? `https://udayton.iad1.qualtrics.com/jfe/form/SV_erC64aogfWSCfzg?username=${encodeURIComponent(username)}`
+                              : 'https://udayton.iad1.qualtrics.com/jfe/form/SV_erC64aogfWSCfzg'
+                          }
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-500 underline"
+                      >
+                        this survey
+                      </a>{""}.
+                    </>
+                )}
+    </pre>
             </div>
             <div className="h-full flex flex-row overflow-hidden">
               {displayRefinedCode ? (
