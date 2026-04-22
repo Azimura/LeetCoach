@@ -33,7 +33,7 @@ LeetCoach has three layers:
 |-------|-----------|------|
 | Frontend | React | Problem display, code editor, chat UI |
 | Backend | Flask | Problem management, dialogue coordination, model inference |
-| LLM | Gemma 3 (27B) via Ollama | Guided assistance with in-context learning |
+| LLM | via Ollama | Guided assistance with in-context learning |
  
 The LLM is given a fixed system prompt that enforces pedagogical rules (see `Prompt Design` below). Each request is augmented with the problem description and the user's recent chat history to maintain conversational continuity.
  
