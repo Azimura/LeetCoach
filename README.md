@@ -12,8 +12,6 @@
 
 LeetCoach is a LeetCode-style coding platform that applies **cognitive forcing**. Instead of providing complete solutions, it prompts you to think, reflect, and work through problems step by step. The goal is to support **incidental learning**: the acquisition of programming knowledge and problem-solving skills as a *byproduct* of engaging with the task, not from being handed the answer.
  
-Built on an open-source LLM via Ollama, LeetCoach is lightweight, transparent, and fully configurable for educational settings.
- 
 ---
  
 ## Key Features
@@ -31,11 +29,9 @@ LeetCoach has three layers:
  
 | Layer | Technology | Role |
 |-------|-----------|------|
-| Frontend | React | Problem display, code editor, chat UI |
-| Backend | Flask | Problem management, dialogue coordination, model inference |
+| [Frontend](frontend) | React | Problem display, code editor, chat UI |
+| [Backend](backend) | Flask | Problem management, dialogue coordination, model inference |
 | LLM | via Ollama | Guided assistance with in-context learning |
- 
-The LLM is given a fixed system prompt that enforces pedagogical rules (see `Prompt Design` below). Each request is augmented with the problem description and the user's recent chat history to maintain conversational continuity.
  
 ---
  
@@ -49,6 +45,8 @@ The chat assistant's behavior is defined entirely through a role-based system pr
 4. **Reasoning-first scaffolding** - require users to commit to an approach before receiving feedback
 5. **Encouraging tone** - supportive and conversational throughout
 This approach operationalizes *explanation-only* and *reasoning-first* interaction patterns shown in prior research to produce significant learning gains.
+
+LeetCoach is **model agnostic**. You can use any Ollama-compatible model by updating the model reference in the backend configuration. The system prompt can also be modified to adjust the assistant's pedagogical strategy, difficulty level, or domain scope.
  
 ---
 
@@ -64,12 +62,6 @@ Then follow the setup instructions for each component:
  
 - **Frontend**: see [`frontend/README.md`](frontend/README.md)
 - **Backend**: see [`backend/README.md`](backend/README.md)
- 
----
- 
-## Customization
- 
-LeetCoach is **model agnostic**. You can use any Ollama-compatible model by updating the model reference in the backend configuration. The system prompt can also be modified to adjust the assistant's pedagogical strategy, difficulty level, or domain scope.
  
 ---
  
