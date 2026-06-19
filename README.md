@@ -26,6 +26,8 @@ LeetCoach is a LeetCode-style coding platform that applies **cognitive forcing**
 ---
  
 ## Architecture
+
+![Layout](assets/llm_flow.png)
  
 LeetCoach has three layers:
  
