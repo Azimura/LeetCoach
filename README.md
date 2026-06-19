@@ -16,7 +16,7 @@ LeetCoach is a LeetCode-style coding platform that applies **cognitive forcing**
  
 ## Key Features
 
-![Demo](assets/leetcoach.png)
+![Demo](assets/UI.png)
  
 - **Chat Assistant** - Socratic, explanation-only AI guidance available during intervention tasks
 - **Code Refinement** - Translates pseudocode or non-Python drafts into executable Python, so you can focus on logic rather than syntax
